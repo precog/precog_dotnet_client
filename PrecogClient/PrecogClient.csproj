@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Precog</RootNamespace>
     <AssemblyName>PrecogClient</AssemblyName>
+    <ReleaseVersion>1.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,13 +34,13 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Client\PrecogClient.cs" />
-    <Compile Include="Client\IJSon.cs" />
-    <Compile Include="Client\Rest.cs" />
-    <Compile Include="Client\Request.cs" />
-    <Compile Include="Client\Options\IngestOptions.cs" />
-    <Compile Include="Client\Options\CSVIngestOptions.cs" />
-    <Compile Include="Client\Dto\AccountInfo.cs" />
-    <Compile Include="Client\Dto\IngestResult.cs" />
+    <Compile Include="Client\SimpleJson.cs" />
+    <Compile Include="Client\IngestOptions.cs" />
+    <Compile Include="Client\MimeTypes.cs" />
+    <Compile Include="Client\QueryOptions.cs" />
+    <Compile Include="Client\AccountInfo.cs" />
+    <Compile Include="Client\IngestResult.cs" />
+    <Compile Include="Client\QueryResult.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -53,10 +54,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Net" />
-    <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Client\Options\" />
-    <Folder Include="Client\Dto\" />
+    <Reference Include="RestSharp">
+      <HintPath>lib\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
   </ItemGroup>
 </Project>

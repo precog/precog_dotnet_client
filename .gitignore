@@ -1,0 +1,12 @@
+# Backup files
+*~
+
+# IDE files
+*.pidb
+*.userprefs
+
+# Generated dirs
+bin/
+docs/
+obj/
+test-results/

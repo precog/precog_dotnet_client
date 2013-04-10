@@ -9,6 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Precog</RootNamespace>
     <AssemblyName>PrecogTests</AssemblyName>
+    <ReleaseVersion>1.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,17 +43,16 @@
       <Private>False</Private>
       <Package>nunit</Package>
     </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="RestSharp">
+      <HintPath>..\..\..\..\..\dotnet\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\TestStore.cs" />
-    <Compile Include="Client\Json\TestJsonServiceStack.cs" />
+    <Compile Include="Client\TestClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\PrecogServiceStack\PrecogServiceStack.csproj">
-      <Project>{A96BD863-C606-4361-B17D-C1F9EE75CAED}</Project>
-      <Name>PrecogServiceStack</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PrecogClient.csproj">
       <Project>{88B629F8-E460-40B5-8725-271B3868F2F8}</Project>
       <Name>PrecogClient</Name>
@@ -67,4 +67,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="Client\" />
+  </ItemGroup>
 </Project>

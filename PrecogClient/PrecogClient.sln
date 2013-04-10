@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrecogClient", "PrecogClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrecogTests", "PrecogTests\PrecogTests.csproj", "{9413D004-3E59-4213-A2BD-799F65EB1E7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrecogServiceStack", "PrecogServiceStack\PrecogServiceStack.csproj", "{A96BD863-C606-4361-B17D-C1F9EE75CAED}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -21,13 +19,9 @@ Global
 		{9413D004-3E59-4213-A2BD-799F65EB1E7E}.Debug|x86.Build.0 = Debug|Any CPU
 		{9413D004-3E59-4213-A2BD-799F65EB1E7E}.Release|x86.ActiveCfg = Release|Any CPU
 		{9413D004-3E59-4213-A2BD-799F65EB1E7E}.Release|x86.Build.0 = Release|Any CPU
-		{A96BD863-C606-4361-B17D-C1F9EE75CAED}.Debug|x86.ActiveCfg = Debug|x86
-		{A96BD863-C606-4361-B17D-C1F9EE75CAED}.Debug|x86.Build.0 = Debug|x86
-		{A96BD863-C606-4361-B17D-C1F9EE75CAED}.Release|x86.ActiveCfg = Release|x86
-		{A96BD863-C606-4361-B17D-C1F9EE75CAED}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = PrecogTests\PrecogTests.csproj
+		StartupItem = PrecogClient.csproj
 		Policies = $0
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = Hierarchical
@@ -56,5 +50,7 @@ Global
 		$7.MessageStyle = $8
 		$8.LineAlign = 0
 		$7.inheritsSet = Mono
+		description = Precog Client for .Net
+		version = 1.0
 	EndGlobalSection
 EndGlobal
