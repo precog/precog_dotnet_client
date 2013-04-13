@@ -2,6 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <DocumentationFile>bin\$(Configuration)\doc.xml</DocumentationFile>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -33,14 +34,14 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Client\PrecogClient.cs" />
-    <Compile Include="Client\SimpleJson.cs" />
-    <Compile Include="Client\IngestOptions.cs" />
-    <Compile Include="Client\MimeTypes.cs" />
-    <Compile Include="Client\QueryOptions.cs" />
     <Compile Include="Client\AccountInfo.cs" />
-    <Compile Include="Client\IngestResult.cs" />
+    <Compile Include="Client\AppendFormat.cs" />
+    <Compile Include="Client\AppendResult.cs" />
+    <Compile Include="Client\Jobs.cs" />
+    <Compile Include="Client\PrecogClient.cs" />
+    <Compile Include="Client\QueryOptions.cs" />
     <Compile Include="Client\QueryResult.cs" />
+    <Compile Include="Client\SimpleJson.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -59,4 +60,16 @@
     </Reference>
     <Reference Include="System.Core" />
   </ItemGroup>
+  <!-- doc generation (monodoc and doxygen) -->
+  <PropertyGroup>
+    <MonodocDirectory>monodoc</MonodocDirectory>
+    <MonoHTMLDirectory>docs\monodoc</MonoHTMLDirectory>
+  </PropertyGroup>
+  <Target Name="Doc" DependsOnTargets="Build">
+    <MakeDir Directories="$(MonodocDirectory)" />
+    <MakeDir Directories="$(MonoHTMLDirectory)" />
+    <Exec Command="doxygen Doxyfile" />
+    <Exec Command="mdoc update -i $(DocumentationFile) -o $(MonodocDirectory) $(OutputPath)\PrecogClient.dll" />
+    <Exec Command="mdoc export-html -o $(MonoHTMLDirectory) $(MonodocDirectory)" />
+  </Target>
 </Project>

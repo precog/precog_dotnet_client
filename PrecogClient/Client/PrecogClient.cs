@@ -1,23 +1,23 @@
 /*
-Copyright (C) 2011-2013 by ReportGrid, Inc. All rights reserved.
+  Copyright (C) 2011-2013 by ReportGrid, Inc. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
 */
 using System;
 using System.Collections.Generic;
@@ -40,7 +40,10 @@ namespace Precog.Client
 	/// </summary>
 	public class PrecogException : Exception
 	{
-		public PrecogException(string message) : base(message) {}
+        /// <summary>
+        /// Creates a PrecogException with the specified message
+        /// </summary>
+		internal PrecogException(string message, params object[] args) : base(String.Format(message, args)) {}
 	}
 
 	/// <summary>
@@ -50,12 +53,17 @@ namespace Precog.Client
 	/// This client provides two classes of methods for all non-Delete operations: cooked and raw. Cooked
 	/// methods (Store, StoreMany, Query) use generic types for serialization and deserialization
 	/// of the data into and out of user-specified types.
-    ///
-    /// Raw methods (Ingest, QueryRaw) either consume or produce raw strings containing the data
-    /// to be ingested or returned from a query.
+	///
+	/// Raw methods (Ingest, QueryRaw) either consume or produce raw strings containing the data
+	/// to be ingested or returned from a query.
 	/// </summary>
 	public class PrecogClient
 	{
+        /// <summary>
+        ///   The default endpoint for use by client instances. Client
+        ///   static and instance constructors default to this <see cref="Uri" />
+        ///   unless one is provided.
+        /// </summary>
 		public static Uri DEFAULT_ENDPOINT = new Uri("https://beta.precog.com");
 
 		/// <summary>
@@ -68,9 +76,9 @@ namespace Precog.Client
 		/// The base path to use for operations with this client.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Thrown if the apiKey or basePath is <see cref="null" />.
+		/// Thrown if the apiKey or basePath is <see langref="null" />.
 		/// </exception>
-		/// <exception cref=ArgumentException>
+		/// <exception cref='ArgumentException'>
 		/// Thrown if the apiKey is empty.
 		/// </exception>
 		public PrecogClient(string apiKey, string basePath): this(DEFAULT_ENDPOINT, apiKey, basePath) {}
@@ -88,12 +96,12 @@ namespace Precog.Client
 		/// The base path to use for operations with this client.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Thrown if the apiKey or basePath is <see cref="null" />.
+		/// Thrown if the apiKey or basePath is <see langref="null" />.
 		/// </exception>
-		/// <exception cref=ArgumentException>
+		/// <exception cref='ArgumentException'>
 		/// Thrown if the apiKey is empty.
 		/// </exception>
- 		public PrecogClient(Uri endpoint, string apiKey, string basePath)
+		public PrecogClient(Uri endpoint, string apiKey, string basePath)
 		{
 			if (apiKey == null)
 			{
@@ -109,7 +117,7 @@ namespace Precog.Client
 			{
 				throw new ArgumentNullException("basePath must not be null");
 			}
-
+			//
 			_apiKey = apiKey;
 
 			// Make sure that the base path doesn't end with "/" so that
@@ -128,8 +136,6 @@ namespace Precog.Client
 
 			_serializer = new JsonSerializer();
 			_client = CreateRestClient(endpoint);
-
-
 		}
 
 		private static RestClient CreateRestClient (Uri endpoint)
@@ -155,15 +161,38 @@ namespace Precog.Client
 		/// <param name='password'>
 		/// user's password
 		/// </param>
-	    public static AccountInfo CreateAccount(String email, String password)
+		public static AccountInfo CreateAccount(String email, String password)
 		{
-			return CreateAccount(DEFAULT_ENDPOINT, email, password);
-	    }
+			return CreateAccount(DEFAULT_ENDPOINT, email, password, "");
+		}
 
 		/// <summary>
-		/// Creates a new account, accessible by the specified email address and password. An Exception
-		/// is thrown if an account already exists for the given email address or if the specified
-		/// endpoint does not use HTTPS.
+		/// Creates a new account with the default endpoint, accessible by the
+		/// specified email address and password. An Exception
+		/// is thrown if an account already exists for the given email address.
+		/// </summary>
+		/// <returns>
+		/// Account info for the newly created account
+		/// </returns>
+		/// <param name='email'>
+		/// user's email
+		/// </param>
+		/// <param name='password'>
+		/// user's password
+		/// </param>
+		/// <param name='profile'>
+		/// Profile data, in JSON format, to be associated with the account. Profile data is not validated,
+		/// so invalid JSON can potentially cause account creation to fail.
+		/// </param>
+		public static AccountInfo CreateAccount(String email, String password, String profile)
+		{
+			return CreateAccount(DEFAULT_ENDPOINT, email, password, profile);
+		}
+
+		/// <summary>
+		/// Creates a new account with the specified endpoint, accessible by the
+		/// specified email address and password. An Exception
+		/// is thrown if an account already exists for the given email address.
 		/// </summary>
 		/// <returns>
 		/// Account info for the newly created account
@@ -177,31 +206,69 @@ namespace Precog.Client
 		/// <param name='password'>
 		/// user's password
 		/// </param>
-	    public static AccountInfo CreateAccount(Uri endpoint, String email, String password)
+		public static AccountInfo CreateAccount(Uri endpoint, String email, String password)
+		{
+			return CreateAccount(endpoint, email, password, "");
+		}
+
+		/// <summary>
+		/// Creates a new account, accessible by the specified email address and password. An Exception
+		/// is thrown if an account already exists for the given email address or if the specified
+		/// endpoint does not use HTTPS.
+		/// </summary>
+		/// <returns>
+		/// Account info for the newly created account
+		/// </returns>
+		/// <param name='endpoint'>
+		/// The endpoint URI to use for client operations. Must use HTTPS or an exception will be thrown.
+		/// </param>
+		/// <param name='email'>
+		/// The email address for the account.
+		/// </param>
+		/// <param name='password'>
+		/// The password for the account.
+		/// </param>
+		/// <param name='profile'>
+		/// Profile data, in JSON format, to be associated with the account. Profile data is not validated,
+		/// so invalid JSON can potentially cause account creation to fail.
+		/// </param>
+		public static AccountInfo CreateAccount(Uri endpoint, String email, String password, String profile)
 		{
 			if (endpoint.Scheme != "https")
 			{
 				throw new PrecogException("HTTPS is required for all account-related operations. Invalid endpoint: " + endpoint);
 			}
 
+			AccountCreate createInfo = null;
+			if (profile != "")
+			{
+				createInfo = new AccountCreate(email, password);
+			}
+			else
+			{
+				createInfo = new AccountCreateProfiled(email, password, profile);
+			}
+
 			var client = CreateRestClient(endpoint);
 
 			var request = new RestRequest("/accounts/v1/accounts/", Method.POST);
 			request.RequestFormat = DataFormat.Json;
-	        request.AddBody(new AccountCreate(email, password));
+			request.AddBody(createInfo);
 
-	        IRestResponse<AccountCreateResponse> response = client.Execute<AccountCreateResponse>(request);
+			IRestResponse<AccountCreateResponse> response = client.Execute<AccountCreateResponse>(request);
 
 			if (response.StatusCode != HttpStatusCode.OK)
 			{
-				throw new PrecogException(response.Content);
+				throw new PrecogException("Error creating account: " + response.Content);
 			}
 
-			return DescribeAccount(endpoint, email, password, response.Data.accountId);
-	    }
+			return AccountDetails(endpoint, email, password, response.Data.accountId);
+		}
 
 		/// <summary>
-		/// Retrieves the details about a particular account. This call is the primary mechanism by which you can retrieve your master API key.
+		/// Retrieves the details about a particular account. This
+		/// call is the primary mechanism by which you can retrieve
+		/// your master API key.
 		/// </summary>
 		/// <returns>
 		/// Account info for the specified account
@@ -215,13 +282,15 @@ namespace Precog.Client
 		/// <param name='accountId'>
 		/// account's id number
 		/// </param>
-		public static AccountInfo DescribeAccount(string email, string password, string accountId)
+		public static AccountInfo AccountDetails(string email, string password, string accountId)
 		{
-			return DescribeAccount(DEFAULT_ENDPOINT, email, password, accountId);
+			return AccountDetails(DEFAULT_ENDPOINT, email, password, accountId);
 		}
 
 		/// <summary>
-		/// Retrieves the details about a particular account. This call is the primary mechanism by which you can retrieve your master API key.
+		/// Retrieves the details about a particular account. This
+		/// call is the primary mechanism by which you can retrieve
+		/// your master API key.
 		/// </summary>
 		/// <returns>
 		/// Account info for the specified account
@@ -238,7 +307,7 @@ namespace Precog.Client
 		/// <param name='accountId'>
 		/// account's id number
 		/// </param>
-	    public static AccountInfo DescribeAccount(Uri endpoint, string email, string password, string accountId)
+		public static AccountInfo AccountDetails(Uri endpoint, string email, string password, string accountId)
 		{
 			if (endpoint.Scheme != "https")
 			{
@@ -255,123 +324,145 @@ namespace Precog.Client
 
 			if (response.StatusCode != HttpStatusCode.OK)
 			{
-				throw new PrecogException(response.Content);
+				throw new PrecogException("Error retrieving account details: " + response.Content);
 			}
 
 			return response.Data;
-	    }
+		}
 
 		/// <summary>
-		/// Ingest a single object at the specified path.
+		/// Append raw strings at the specified path.
 		/// </summary>
 		/// <description>
-		/// The internal JSON machinery is
-		/// used to serialize the data. If you need full control over serialization,
-		/// use <see cref="IngestRaw"/> instead.
-		/// As an example, assume we have a struct we would like to ingest:
-		/// <code>
-		/// public class MyData
-		/// {
-		/// 	public string Name { get; set; }
-		/// 	public int Count { get; set; }
-		/// }
-		/// </code>
-		/// We can construct an instance and use our client to ingest it directly:
-		/// <code>
-		/// var foo = new MyData();
-		/// //... fill in values
-		///
-		/// client.Ingest("/test/data/path", foo);
-		/// </code>
+		/// For those needing more control over serialization, or non-JSON append,
+		/// this method allows full control
+		/// over the data content.
 		/// </description>
+        /// <example>
+        /// For example, to append CSV data:
+		/// <code>
+		/// client.AppendRaw("/some/test/path", Formats.CSV, "this,is,the,header\n,these,are,the,values");
+		/// </code>
+        /// </example>
 		/// <param name='path'>
-		/// The storage path for the record.
+		/// The storage path for the data.
 		/// </param>
-		/// <param name='record'>
-		/// A serializable record object.
+		/// <param name='format'>
+		/// Indicates the content type of the append data.
 		/// </param>
-	    public IngestResult Store<T>(string path, T record)
+		/// <param name='content'>
+		/// The content to be appended. No processing is performed on this content.
+		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the provided content is empty or <see langref="null"/>.
+		/// </exception>
+		public AppendResult AppendRaw(string path, AppendFormat format, string content)
 		{
-			return Ingest(path, _serializer.Serialize(record), new IngestOptions());
-	    }
-
-		/// <summary>
-		/// Ingest a multiple objects at the specified path. The internal JSON machinery is
-		/// used to serialize the data. If you need full control over serialization,
-		/// use <see cref="IngestRaw"/> instead.
-		/// </summary>
-		/// <param name='path'>
-		/// The storage path for the record.
-		/// </param>
-		/// <param name='records'>
-		/// A collection of serializable objects.
-		/// </param>
-		public IngestResult StoreAll<T>(string path, IEnumerable<T> records)
-		{
-			// Collapse all entities into a stream
-			var content = "";
-
-			foreach (T record in records)
-			{
-				content += _serializer.Serialize(record) + "\n";
+			if (content == null || content=="") {
+				throw new ArgumentNullException("argument 'content' must contain a non empty value formatted as described by type");
 			}
 
-			return Ingest(path, content, new IngestOptions());
+            ValidatePath(path);
+
+			// RestSharp, sadly, adheres to the spec and won't put params in the URI when using POST method
+			// This method always performs batched/sync append
+			var paramString = String.Format("?{0}={1}&mode=batch&receipt=true", Params.API_KEY, _apiKey);
+
+			var request = new RestRequest(Services.INGEST + _basePath + path + paramString + format.RequestParameters(), Method.POST);
+			// Although we're raw on input, we need this to properly deserialize the result
+			request.RequestFormat = DataFormat.Json;
+
+			// We bypass serialization here, since we're "raw"
+			request.AddParameter(format.ContentType, content, ParameterType.RequestBody);
+
+			IRestResponse response = _client.Execute(request);
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				throw new PrecogException("Error appending data: " + response.Content);
+			}
+
+			return DeserializeAppendResult(response.Content);
 		}
 
 		/// <summary>
-		/// Stores the file specified at the given path with the given MIME type.
+		/// Append raw string data at the specified path.
 		/// </summary>
-		/// <returns>
-		/// The file to ingest.
-		/// </returns>
+		/// <description>
+		/// For those needing more control over serialization, or
+		/// non-JSON append, this method allows full control over the
+		/// data content. The data will be sent using chunked
+		/// encoding.
+        /// <example>
+        /// For example, to append CSV data:
+		///   <code>
+		///     client.AppendRaw("/some/test/path", Formats.CSV, "this,is,the,header\n,these,are,the,values");
+		///   </code>
+        /// </example>
+		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data.
 		/// </param>
-		/// <param name='filename'>
-		/// The name of the file to ingest.
+		/// <param name='format'>
+		/// Indicates the content type of the append data.
 		/// </param>
-		/// <param name='mimeType'>
-		/// The MIME type for the file contents.
+		/// <param name='content'>
+		/// The content to be appended. No processing is performed on this content.
 		/// </param>
-		public IngestResult StoreFile(string path, string filename, MimeType mimeType)
-		{
-			return StoreFile(path, filename, new IngestOptions(mimeType));
-		}
+        public AppendResult AppendRawStream(string path, AppendFormat format, Stream content)
+        {
+            return AppendRawStream(path, format, 0, content);
+        }
 
 		/// <summary>
-		/// Stores the file specified at the given path with the given MIME type.
+		/// Append raw string data at the specified path.
 		/// </summary>
-		/// <returns>
-		/// The file to ingest.
-		/// </returns>
+		/// <description>
+		/// For those needing more control over serialization, or
+		/// non-JSON append, this method allows full control over the
+		/// data content.
+        /// <example>
+        /// For example, to append CSV data:
+		///   <code>
+		///     client.AppendRaw("/some/test/path", Formats.CSV, "this,is,the,header\n,these,are,the,values");
+		///   </code>
+        /// </example>
+		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data.
 		/// </param>
-		/// <param name='filename'>
-		/// The name of the file to ingest.
+		/// <param name='format'>
+		/// Indicates the content type of the append data.
 		/// </param>
-		/// <param name='options'>
-		/// Options controlling the content type of the ingest data as well as other ingest-related
-		/// parameters. MimeType must be set.
+        /// <param name='contentLength'>
+        /// The length of the content to be read from the Stream. If this is zero, the transfer will be performed using chunked encoding.
+        /// </param>
+		/// <param name='content'>
+		/// The content to be appended. No processing is performed on this content.
 		/// </param>
-		public IngestResult StoreFile(string path, string filename, IngestOptions options)
-		{
+        public AppendResult AppendRawStream(string path, AppendFormat format, long contentLength, Stream content)
+        {
 			var uriString = String.Format ("{0}/ingest/v1/fs{1}{2}?{3}={4}&mode=batch&receipt=true", _client.BaseUrl, _basePath, path, Params.API_KEY, _apiKey);
 
 			// RestSharp doesn't do raw bodies (?!?!?!)
 			HttpWebRequest http = (HttpWebRequest) HttpWebRequest.Create(uriString);
 
 			http.Method = "POST";
-			http.ContentType = MimeTypeUtil.FromMimeType(options.MimeType).MediaType;
-			http.ContentLength = (new FileInfo(filename)).Length;
-			using (FileStream input = new FileStream(filename, FileMode.Open))
-			{
-				using (Stream output = http.GetRequestStream())
-				{
-					input.CopyTo(output);
-				}
-			}
+			http.ContentType = format.ContentType;
+
+            if (contentLength > 0)
+            {
+                http.ContentLength = contentLength;
+            }
+            else
+            {
+                http.SendChunked = true;
+            }
+
+            using (Stream output = http.GetRequestStream())
+            {
+                content.CopyTo(output);
+            }
 
 			using (HttpWebResponse response = (HttpWebResponse) http.GetResponse())
 			{
@@ -379,142 +470,157 @@ namespace Precog.Client
 
 				if (response.StatusCode != HttpStatusCode.OK)
 				{
-					throw new PrecogException(body);
+					throw new PrecogException("Error appending data: " + body);
 				}
 
-				var raw = SimpleJson.DeserializeObject<JsonObject>(body);
-
-				var result = new IngestResult();
-
-				var errors = new List<IngestError>();
-				foreach (object error in ((JsonArray) raw["errors"]))
-				{
-					var err = new IngestError();
-					err.Line = (int) (long) ((JsonObject) error)["line"];
-					err.Reason = (string) ((JsonObject) error)["reason"];
-					errors.Add(err);
-				}
-
-				result.Errors = errors;
-				result.Failed = (int) (long) raw["failed"];
-				result.Ingested = (int) (long) raw["ingested"];
-				result.IngestId = (string) raw["ingestId"];
-				result.Total = (int) (long) raw["total"];
-
-				return result;
+                return DeserializeAppendResult(body);
 			}
-		}
+        }
 
+        private AppendResult DeserializeAppendResult(string rawContent)
+        {
+            //Console.WriteLine("Got AppendResult: " + rawContent);
+
+            var raw = SimpleJson.DeserializeObject<JsonObject>(rawContent);
+
+            var errors = new List<AppendError>();
+            foreach (object error in ((JsonArray) raw["errors"]))
+            {
+                var err = new AppendError();
+                err.Line = (int) (long) ((JsonObject) error)["line"];
+                err.Reason = (string) ((JsonObject) error)["reason"];
+                errors.Add(err);
+            }
+
+            return new AppendResult((int) (long) raw["total"],
+                                    (int) (long) raw["ingested"],
+                                    (int) (long) raw["failed"],
+                                    new IngestCompletion((string) raw["ingestId"]),
+                                    errors);
+        }
+
+        /// <summary>
+        ///   Reads the response content into a string for parsing/processing
+        /// </summary>
 		private string ReadResponseBody(HttpWebResponse response)
 		{
 			var buffer = new byte[response.ContentLength];
 
 			var input = response.GetResponseStream();
 
-			// Downcasting to an int is safe here because we know that we'll only ever return small messages/JSON
+			// Downcasting to an int is safe here because we know that
+			// we'll only ever return small messages/JSON
 			input.Read(buffer, 0, (int) response.ContentLength);
 
 			return System.Text.UTF8Encoding.UTF8.GetString(buffer);
 		}
 
 		/// <summary>
-		/// Ingest raw JSON/CSV strings at the specified path.
+		/// Appends the file specified at the given path with the given MIME type.
 		/// </summary>
-		/// <description>
-		/// For those needing more control over serialization, or non-JSON ingest,
-		/// this method allows full control
-		/// over the data content. For example, to ingest CSV data:
-		/// <code>
-		/// client.IngestRaw("/some/test/path", "this,is,the,header\n,these,are,the,values", MimeType.CSV);
-		/// </code>
-		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data in the file.
 		/// </param>
-		/// <param name='content'>
-		/// The content to be ingested. No processing is performed on this content.
+		/// <param name='format'>
+		/// Indicates the content type of the append data.
 		/// </param>
-		/// <param name='mimeType'>
-		/// The MIME type of the provided content.
+		/// <param name='filename'>
+		/// The name of the file to append.
 		/// </param>
-		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the provided content is empty or <see cref="null"/>.
-		/// </exception>
-		public IngestResult Ingest(string path, string content, MimeType mimeType)
+		public AppendResult AppendFromFile(string path, AppendFormat format, string filename)
 		{
-			return Ingest(path, content, new IngestOptions(mimeType));
+			using (FileStream input = new FileStream(filename, FileMode.Open))
+			{
+                return AppendRawStream(path, format, (new FileInfo(filename)).Length, input);
+			}
 		}
 
 		/// <summary>
-		/// Ingest raw JSON/CSV strings at the specified path.
+		/// Uploads the file specified at the given path, overwriting any existing data at that path.
 		/// </summary>
-		/// <description>
-		/// For those needing more control over serialization, or non-JSON ingest,
-		/// this method allows full control
-		/// over the data content. For example, to ingest CSV data:
-		/// <code>
-		/// var opts = new IngestOptions(MimeType.CSV);
-		/// client.IngestRaw("/some/test/path", "this,is,the,header\n,these,are,the,values", opts);
-		/// </code>
-		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data in the file.
 		/// </param>
-		/// <param name='content'>
-		/// The content to be ingested. No processing is performed on this content.
+		/// <param name='format'>
+		/// Indicates the content type of the append data.
 		/// </param>
-		/// <param name='options'>
-		/// Options controlling the content type of the ingest data as well as other ingest-related
-		/// parameters. Content type must be set.
+		/// <param name='filename'>
+		/// The name of the file to append.
 		/// </param>
-		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the provided content is empty or <see cref="null"/>.
-		/// </exception>
-	    public IngestResult Ingest(string path, string content, IngestOptions options)
+		public AppendResult UploadFile(string path, AppendFormat format, string filename)
 		{
-	        if (content == null || content=="") {
-	            throw new ArgumentNullException("argument 'content' must contain a non empty value formatted as described by type");
-	        }
+            Delete(path);
 
-			if (path == null || ! path.StartsWith("/"))
+			using (FileStream input = new FileStream(filename, FileMode.Open))
 			{
-				throw new ArgumentException("Invalid path provided. Paths must start with '/': " + path);
+                return AppendRawStream(path, format, (new FileInfo(filename)).Length, input);
 			}
-
-			// RestSharp, sadly, adheres to the spec and won't put params in the URI when using POST method
-			// This method always performs batched/sync ingest
-			var paramString = String.Format("?{0}={1}&mode=batch&receipt=true", Params.API_KEY, _apiKey);
-
-			if (options.HasOwnerAccountId)
-			{
-				paramString += String.Format("&ownerAccountId={0}", options.OwnerAccountId);
-			}
-
-			var request = new RestRequest(Services.INGEST + _basePath + path + paramString, Method.POST);
-			// Although we're raw on input, we need this to properly deserialize the result
-			request.RequestFormat = DataFormat.Json;
-
-			request.AddHeader("Content-Type", MimeTypeUtil.FromMimeType(options.MimeType).MediaType);
-			// We bypass serialization here, since we're "raw"
-			request.AddParameter("content", content, ParameterType.RequestBody);
-
-			IRestResponse<IngestResult> response = _client.Execute<IngestResult>(request);
-
-			if (response.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException(response.Content);
-			}
-
-			return response.Data;
-	    }
+		}
 
 		/// <summary>
-		/// Deletes the data at the specified service-relative path.
+		/// Append a single object at the specified path.
+		/// </summary>
+		/// <description>
+		/// The internal JSON machinery is
+		/// used to serialize the data. If you need full control over serialization,
+		/// use <see cref="M:Append(string, string, Precog.Client.MimeType)"/> instead.
+		/// </description>
+        /// <example>
+		///   Assume we have a struct we would like to append:
+		/// <code>
+		/// public class MyData
+		/// {
+		///	    public string Name { get; set; }
+		///	    public int Count { get; set; }
+		/// }
+		/// </code>
+		/// We can construct an instance and use our client to append it directly:
+		/// <code>
+		/// var foo = new MyData();
+		/// //... fill in values
+		///
+		/// client.Append("/test/data/path", foo);
+		/// </code>
+        /// </example>
+		/// <param name='path'>
+		/// The storage path for the record.
+		/// </param>
+		/// <param name='record'>
+		/// A serializable record object.
+		/// </param>
+		public AppendResult Append<T>(string path, T record)
+		{
+			return AppendRaw(path, Formats.JSON, _serializer.Serialize(record));
+		}
+
+		/// <summary>
+		/// Append a multiple objects at the specified path. The internal JSON machinery is
+		/// used to serialize the data. If you need full control over serialization,
+		/// use <see cref="M:Append(string, string, Precog.Client.MimeType)"/> instead.
 		/// </summary>
 		/// <param name='path'>
-		/// The service-relative path. E.g. "/1234567890/test" maps to "/ingest/v1/fs/1234567890/test".
+		/// The storage path for the record.
 		/// </param>
-	    public void Delete(string path)
+		/// <param name='records'>
+		/// A collection of serializable objects.
+		/// </param>
+		public AppendResult AppendAll<T>(string path, IEnumerable<T> records)
+		{
+			return AppendRaw(path, Formats.JSON, _serializer.Serialize(records));
+		}
+
+		/// <summary>
+		/// Deletes the data at the specified path.
+		/// </summary>
+        /// <remarks>
+        ///   <para>
+        ///     Deletes the data s
+        ///   </para>
+        /// </remarks>
+		/// <param name='path'>
+		/// The path. E.g. "/1234567890/test" maps to "/ingest/v1/fs/1234567890/test".
+		/// </param>
+		public void Delete(string path)
 		{
 			if (path == null || ! path.StartsWith("/"))
 			{
@@ -527,15 +633,15 @@ namespace Precog.Client
 
 			if (result.StatusCode != HttpStatusCode.OK)
 			{
-				throw new PrecogException(result.Content);
+				throw new PrecogException("Error deleting data: " + result.Content);
 			}
-	    }
+		}
 
 		/// <summary>
-		/// Execute the given query using the specified account-relative base path. No limit, skip or sorting is performed.
+		/// Execute the given query using the specified base path. No limit, skip or sorting is performed.
 		/// </summary>
 		/// <param name='path'>
-		/// The account-relative base path for the query. If "/", all paths inside the query must be fully-specified.
+		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:
 		/// <code>
 		/// client.Query("/test", "count(//foo)");
@@ -555,10 +661,10 @@ namespace Precog.Client
 		}
 
 		/// <summary>
-		/// Execute the given query using the specified account-relative base path.
+		/// Execute the given query using the specified base path.
 		/// </summary>
 		/// <param name='path'>
-		/// The account-relative base path for the query. If "/", all paths inside the query must be fully-specified.
+		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:
 		/// <code>
 		/// client.Query("/test", "count(//foo)");
@@ -575,34 +681,42 @@ namespace Precog.Client
 		/// The result type for the query. The underlying JSON result will be
 		/// deserialized to this type.
 		/// </typeparam>
-	    public QueryResult<T> Query<T>(string path, string query, QueryOptions options) where T: new()
+		public QueryResult<T> Query<T>(string path, string query, QueryOptions options) where T: new()
 		{
 			var result = QueryInternal<JsonObject>(path, query, options);
-			var raw = SimpleJson.DeserializeObject<JsonObject>(result.Content);
+
+			return DeserializeQueryResult<T>(result.Content);
+		}
+
+        private QueryResult<T> DeserializeQueryResult<T>(string rawContent) where T : new()
+        {
+            var raw = SimpleJson.DeserializeObject<JsonObject>(rawContent);
 
 			// The following code works around a yet-to-be-determined bug in RestSharp deserialization of nested classes
-			var finalResult = new QueryResult<T>();
-			finalResult.DataRaw = raw["data"].ToString();
-			finalResult.Errors = SimpleJson.DeserializeObject<IList<MessageReport>>(raw["errors"].ToString());
-			finalResult.Warnings = SimpleJson.DeserializeObject<IList<MessageReport>>(raw["warnings"].ToString());
+			var dataRaw = raw["data"].ToString();
+            var errors = SimpleJson.DeserializeObject<IList<MessageReport>>(raw["errors"].ToString());
+			var warnings = SimpleJson.DeserializeObject<IList<MessageReport>>(raw["warnings"].ToString());
 
-			var serverErrors = (JsonArray) raw["serverErrors"];
+			var data = new List<T>(((JsonArray) raw["data"]).Select<object, T>(x => SimpleJson.DeserializeObject<T>(x.ToString())));
 
-			finalResult.ServerErrors = new List<string>(serverErrors.Select<object, string>(x => x.ToString()));
+            if (raw.Keys.Contains("serverErrors"))
+            {
+                var serverErrors = new List<string>(((JsonArray) raw["serverErrors"]).Select<object, string>(x => x.ToString()));
 
-			var dataArray = (JsonArray) raw["data"];
-
-			finalResult.Data = new List<T>(dataArray.Select<object, T>(x => SimpleJson.DeserializeObject<T>(x.ToString())));
-
-			return finalResult;
-	    }
+                return new QueryResult<T>(data, dataRaw, serverErrors, errors, warnings);
+            }
+            else
+            {
+                return new QueryResult<T>(data, dataRaw, new List<string>(), errors, warnings);
+            }
+        }
 
 		/// <summary>
 		/// Execute the given query using the specified base path and default options. The raw
 		/// JSON string result is returned directly.
 		/// </summary>
 		/// <param name='path'>
-		/// The service-relative base path for the query. If "/", all paths inside the query must be fully-specified.
+		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:
 		/// <code>
 		/// client.Query("/1234567890/test", "count(//foo)");
@@ -612,21 +726,21 @@ namespace Precog.Client
 		/// <param name='query'>
 		/// The quirrel query string. No quoting is required.
 		/// </param>
-	    public String QueryRaw(string path, string query)
+		public String QueryRaw(string path, string query)
 		{
 			return QueryInternal<JsonObject>(path, query, new QueryOptions()).Content;
-	    }
+		}
 
 		/// <summary>
 		/// Execute the given query using the specified base path. The raw
 		/// JSON string result is returned directly.
 		/// </summary>
 		/// <param name='path'>
-		/// The service-relative base path for the query. If "/", all paths inside the query must be fully-specified.
+		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:
 		/// <code>
-		/// client.Query("/1234567890/test", "count(//foo)");
-		/// client.Query("/", "count(//1234567890/foo/test)");
+		/// client.QueryRaw("/1234567890/test", "count(//foo)");
+		/// client.QueryRaw("/", "count(//1234567890/foo/test)");
 		/// </code>
 		/// </param>
 		/// <param name='query'>
@@ -635,21 +749,49 @@ namespace Precog.Client
 		/// <param name='options'>
 		/// Options controlling the results such as skip, limit, and sorting.
 		/// </param>
-	    public String QueryRaw(string path, string query, QueryOptions options)
+		public String QueryRaw(string path, string query, QueryOptions options)
 		{
 			return QueryInternal<JsonObject>(path, query, options).Content;
-	    }
+		}
 
+        public AsyncQuery QueryAsync(string path, string query)
+        {
+            ValidatePath(path);
+
+            var request = new RestRequest(Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, _basePath + path, query), Method.POST);
+
+            var response = _client.Execute<AsyncQuery>(request);
+
+			if (response.StatusCode != HttpStatusCode.Accepted)
+			{
+				throw new PrecogException("Error during async query : " + response.Content);
+			}
+
+			return response.Data;
+        }
+
+        public string QueryResultsRaw(AsyncQuery query)
+        {
+            var request = new RestRequest(Services.ANALYTICS_ASYNC + String.Format("/{0}?apiKey={1}", query.JobId, _apiKey), Method.GET);
+
+            var response = _client.Execute(request);
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				throw new PrecogException("Error retrieving async results ({0}): {1}", response.StatusCode, response.Content);
+			}
+
+			return response.Content;
+        }
+
+        public QueryResult<T> QueryResults<T>(AsyncQuery query) where T : new()
+        {
+			return DeserializeQueryResult<T>(QueryResultsRaw(query));
+        }
 
 		private IRestResponse<T> QueryInternal<T>(string path, string query, QueryOptions options) where T: new()
 		{
-			if (path == null || ! path.StartsWith("/"))
-			{
-				throw new ArgumentException("Invalid path provided. Paths must start with '/': " + path);
-			}
-
-			// Horrid workaround for overzealous RestSharp RESTification of GET URIs
-			var finalPath = path == "/" ? "//" : path;
+            var finalPath = ValidatePath(path);
 
 			var request = new RestRequest(Services.ANALYTICS + _basePath + finalPath, Method.GET);
 			request.RequestFormat = DataFormat.Json;
@@ -692,6 +834,22 @@ namespace Precog.Client
 			return response;
 		}
 
+        private string ValidatePath(string path)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException("Path cannot be null");
+            }
+
+            if (! path.StartsWith("/"))
+            {
+                throw new ArgumentException("Invalid path. Paths must start with \"/\": \"{0}\"", path);
+            }
+
+			// Horrid workaround for overzealous RestSharp RESTification of GET URIs
+			return path == "/" ? "//" : path;
+        }
+
 		private static class Params
 		{
 			public const string API_KEY = "apiKey";
@@ -703,6 +861,7 @@ namespace Precog.Client
 		{
 			public const string INGEST    = "/ingest/v1/fs";
 			public const string ANALYTICS = "/analytics/v1/fs";
+            public const string ANALYTICS_ASYNC = "/analytics/v1/queries";
 		}
 
 		private RestClient _client;

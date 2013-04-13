@@ -45,7 +45,7 @@
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="RestSharp">
-      <HintPath>..\..\..\..\..\dotnet\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\lib\RestSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -70,4 +70,15 @@
   <ItemGroup>
     <Folder Include="Client\" />
   </ItemGroup>
+  <!-- MSBuild task integration -->
+  <PropertyGroup>
+    <MSBuildCommunityTasksPath>..\lib</MSBuildCommunityTasksPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildCommunityTasksPath)\MSBuild.Community.Tasks.Targets" />
+  <Target Name="Test" DependsOnTargets="Build">
+    <CreateItem Include="bin\$(Configuration)\*Tests.dll">
+      <Output TaskParameter="Include" ItemName="TestAssembly" />
+    </CreateItem>
+    <NUnit Assemblies="@(TestAssembly)" ToolPath="." />
+  </Target>  
 </Project>

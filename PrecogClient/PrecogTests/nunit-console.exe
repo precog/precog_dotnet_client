@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This file is used to work around https://github.com/loresoft/msbuildtasks/issues/9
+
+args=( "$@" )
+
+files=()
+
+for i in `seq 0 $#`; do
+    if [ -e "${args[i]}" ]; then
+        #echo "${args[i]} is not a file"
+        files=("${files[@]}" "${args[i]}")
+    fi
+done
+
+exec nunit-console -nologo -labels "${files[@]}"
