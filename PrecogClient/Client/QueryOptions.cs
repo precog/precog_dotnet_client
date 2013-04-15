@@ -29,28 +29,28 @@ namespace Precog.Client
 	/// </summary>
 	public class QueryOptions
 	{
-        /// <summary>
-        ///   The order for use in sorting.
-        /// </summary>
+		/// <summary>
+		///	  The order for use in sorting.
+		/// </summary>
 		public enum Order
 		{
-            /// <summary>
-            ///   Sorts from lowest to highest.
-            /// </summary>
+			/// <summary>
+			///	  Sorts from lowest to highest.
+			/// </summary>
 			ASCENDING,
 
-            /// <summary>
-            ///   Sorts from highest to lowest.
-            /// </summary>
+			/// <summary>
+			///	  Sorts from highest to lowest.
+			/// </summary>
 			DESCENDING
 		}
 
-        /// <summary>
-        ///   Constructs a new QueryOptions instance that will return
-        ///   unlimited results, starts at the first result element
-        ///   (zero offset), and sorts ascending (although by default
-        ///   no sort fields are specified)
-        /// </summary>
+		/// <summary>
+		///	  Constructs a new QueryOptions instance that will return
+		///	  unlimited results, starts at the first result element
+		///	  (zero offset), and sorts ascending (although by default
+		///	  no sort fields are specified)
+		/// </summary>
 		public QueryOptions ()
 		{
 			Limit = 0;
@@ -84,18 +84,18 @@ namespace Precog.Client
 		/// <summary>
 		/// Sets an offset (in result element count) at which to begin results.
 		/// </summary>
-        /// <example language="c#">
-        /// Limit and Skip can be used to page results, if desired.
-        /// <code>
-        /// public QueryResult&lt;T&gt; Paged(string path, string query, int pageSize, int pageNumber)
+		/// <example language="c#">
+		/// Limit and Skip can be used to page results, if desired.
+		/// <code>
+		/// public QueryResult&lt;T&gt; Paged(string path, string query, int pageSize, int pageNumber)
 		/// {
 		///		var options = new QueryOptions();
 		///		options.Limit = pageSize;
 		///		options.Skip = pageSize * (pageNumber - 1)
 		///		return client.Query&lt;T&gt;(path, query, options);
 		/// }
-        /// </code>
-        /// </example>
+		/// </code>
+		/// </example>
 		public int Skip
 		{
 			get
@@ -116,19 +116,19 @@ namespace Precog.Client
 		/// <summary>
 		/// A List of field names to order on, in dotted notation. The sort is performend with
 		/// precedence in the order that the names occur in the List.
-        /// <example language="c#">
+		/// <example language="c#">
 		/// <code>
 		/// var opts = new QueryOptions();
 		/// opts.SortOn(new List&lt;string&gt; { "foo", "foo.bar", "baz" });
-        /// var results = client.Query&lt;T&gt;(path, query, opts);
+		/// var results = client.Query&lt;T&gt;(path, query, opts);
 		/// </code>
-        /// </example>
+		/// </example>
 		/// </summary>
 		public IList<string> SortOn { get; set; }
 
-        /// <summary>
-        ///   Controls the sort order (either <see cref="Order.ASCENDING" /> or <see cref="Order.DESCENDING" />)
-        /// </summary>
+		/// <summary>
+		///	  Controls the sort order (either <see cref="Order.ASCENDING" /> or <see cref="Order.DESCENDING" />)
+		/// </summary>
 		public Order SortOrder { get; set; }
 	}
 }

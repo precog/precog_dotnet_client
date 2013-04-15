@@ -24,65 +24,65 @@ using System.Collections.Generic;
 
 namespace Precog.Client
 {
-    /// <summary>
-    /// Represents the result of an Append/Store call
-    /// </summary>
-    public class AppendResult
-    {
-        /// <summary>
-        /// The total number of records attempted.
-        /// </summary>
-        public readonly int Total;
+	/// <summary>
+	/// Represents the result of an Append/Store call
+	/// </summary>
+	public class AppendResult
+	{
+		/// <summary>
+		/// The total number of records attempted.
+		/// </summary>
+		public readonly int Total;
 
-        /// <summary>
-        /// The total number of records successfully appended.
-        /// </summary>
-        public readonly int Ingested;
+		/// <summary>
+		/// The total number of records successfully appended.
+		/// </summary>
+		public readonly int Ingested;
 
-        /// <summary>
-        /// The total number of records that failed to append.
-        /// </summary>
-        public readonly int Failed;
+		/// <summary>
+		/// The total number of records that failed to append.
+		/// </summary>
+		public readonly int Failed;
 
-        /*
-        /// <summary>
-        /// The Append ID that can be used to track end-to-end storage of the events.
-        /// </summary>
-        public readonly IngestCompletion IngestJob;
-        */
+		/*
+		/// <summary>
+		/// The Append ID that can be used to track end-to-end storage of the events.
+		/// </summary>
+		public readonly IngestCompletion IngestJob;
+		*/
 
-        /// <summary>
-        /// A List of any errors that occurred during append.
-        /// </summary>
-        public readonly List<AppendError> Errors;
+		/// <summary>
+		/// A List of any errors that occurred during append.
+		/// </summary>
+		public readonly List<AppendError> Errors;
 
-        /// <summary>
-        ///   Create a new AppendResult instance
-        /// </summary>
-        internal AppendResult(int total, int ingested, int failed, /* IngestCompletion ingestId,*/ List<AppendError> errors)
-        {
-            Total = total;
-            Ingested  = ingested;
-            Failed  = failed;
-            //IngestJob  = ingestId;
-            Errors = errors;
-        }
-    }
+		/// <summary>
+		///	  Create a new AppendResult instance
+		/// </summary>
+		internal AppendResult(int total, int ingested, int failed, /* IngestCompletion ingestId,*/ List<AppendError> errors)
+		{
+			Total = total;
+			Ingested  = ingested;
+			Failed	= failed;
+			//IngestJob	 = ingestId;
+			Errors = errors;
+		}
+	}
 
-    /// <summary>
-    /// Encapsulates information about errors during append.
-    /// </summary>
-    public class AppendError
-    {
-        /// <summary>
-        /// The line of the input on which the error occured.
-        /// </summary>
-        public int Line { get; set; }
+	/// <summary>
+	/// Encapsulates information about errors during append.
+	/// </summary>
+	public class AppendError
+	{
+		/// <summary>
+		/// The line of the input on which the error occured.
+		/// </summary>
+		public int Line { get; set; }
 
-        /// <summary>
-        /// The append error reason message.
-        /// </summary>
-        public string Reason { get; set; }
-    }
+		/// <summary>
+		/// The append error reason message.
+		/// </summary>
+		public string Reason { get; set; }
+	}
 }
 

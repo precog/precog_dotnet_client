@@ -34,6 +34,7 @@ using RestSharp.Deserializers;
 namespace Precog.Client
 {
 	using Dto;
+	using Format;
 
 	/// <summary>
 	/// A basic exception thrown when the client encounters an error.
@@ -175,7 +176,7 @@ namespace Precog.Client
 
 		/// <summary>
 		/// Creates a new account with the default endpoint, accessible by the
-		/// specified email address and password, with the provided profile.
+		/// specified email address and password, with the specified profile.
 		/// </summary>
 		/// <remarks>
 		///	  <para>
@@ -202,7 +203,7 @@ namespace Precog.Client
 
 		/// <summary>
 		/// Creates a new account with the default endpoint, accessible by the
-		/// specified email address and password, with the provided profile.
+		/// specified email address and password, with the specified profile.
 		/// </summary>
 		/// <remarks>
 		///	  <para>
@@ -230,9 +231,13 @@ namespace Precog.Client
 
 		/// <summary>
 		/// Creates a new account with the specified endpoint, accessible by the
-		/// specified email address and password. An Exception
-		/// is thrown if an account already exists for the given email address.
+		/// specified email address and password.
 		/// </summary>
+		/// <remarks>
+		///	  <para>
+		///		 An Exception is thrown if an account already exists for the given email address.
+		///	  </para>
+		/// </remarks>
 		/// <returns>
 		/// Account info for the newly created account
 		/// </returns>
@@ -251,8 +256,8 @@ namespace Precog.Client
 		}
 
 		/// <summary>
-		/// Creates a new account with the provided endpoint, accessible by the
-		/// specified email address and password, with the provided profile data.
+		/// Creates a new account with the specified endpoint, accessible by the
+		/// specified email address and password, with the specified profile data.
 		/// </summary>
 		/// <remarks>
 		///	  <para>
@@ -311,8 +316,8 @@ namespace Precog.Client
 		}
 
 		/// <summary>
-		/// Creates a new account with the provided endpoint, accessible by the
-		/// specified email address and password, with the provided profile data.
+		/// Creates a new account with the specified endpoint, accessible by the
+		/// specified email address and password, with the specified profile data.
 		/// </summary>
 		/// <remarks>
 		///	  <para>
@@ -437,7 +442,7 @@ namespace Precog.Client
 		/// api key for this client. null indicates omission.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the provided content is empty or <see langref="null"/>.
+		/// Is thrown if the specified content is empty or null.
 		/// </exception>
 		public AppendResult AppendRaw(string path, AppendFormat format, string content, string ownerAccountId)
 		{
@@ -497,7 +502,7 @@ namespace Precog.Client
 		/// The content to be appended. No processing is performed on this content.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the provided content is empty or <see langref="null"/>.
+		/// Is thrown if the specified content is empty or null.
 		/// </exception>
 		public AppendResult AppendRaw(string path, AppendFormat format, string content)
 		{
@@ -767,7 +772,7 @@ namespace Precog.Client
 		}
 
 		/// <summary>
-		///	  Append a single object at the specified path with the provided owner account Id.
+		///	  Append a single object at the specified path with the specified owner account Id.
 		/// </summary>
 		/// <remarks>
 		///	  <para>

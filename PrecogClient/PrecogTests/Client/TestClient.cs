@@ -30,6 +30,8 @@ using RestSharp.Serializers;
 
 namespace Precog.Client
 {
+	using Format;
+
 	class TestData
 	{
         public int Number { get; set; }

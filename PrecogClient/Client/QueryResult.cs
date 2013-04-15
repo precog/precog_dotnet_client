@@ -33,63 +33,63 @@ namespace Precog.Client
 	/// return the count as the first element of the List.
 	/// </description>
 	public class QueryResult<T> where T: new()
-        {
-            /// <summary>
-            /// The result data. Each element will have been deserialized to
-            /// type "T". If you want raw JSON, simply use <see cref="string"/>.
-            /// </summary>
-            public readonly IList<T> Data;
+		{
+			/// <summary>
+			/// The result data. Each element will have been deserialized to
+			/// type "T". If you want raw JSON, simply use <see cref="string"/>.
+			/// </summary>
+			public readonly IList<T> Data;
 
-            /// <summary>
-            /// The raw JSON String result (this will be an array of result elements)
-            /// </summary>
-            public readonly string DataRaw;
+			/// <summary>
+			/// The raw JSON String result (this will be an array of result elements)
+			/// </summary>
+			public readonly string DataRaw;
 
-            /// <summary>
-            ///   A List of server-side errors. These are distinct
-            ///   from quirrel compile errors and warnings, reported
-            ///   in <see cref="Errors" /> and <see cref="Warnings" />
-            /// </summary>
-            public readonly IList<string> ServerErrors;
+			/// <summary>
+			///	  A List of server-side errors. These are distinct
+			///	  from quirrel compile errors and warnings, reported
+			///	  in <see cref="Errors" /> and <see cref="Warnings" />
+			/// </summary>
+			public readonly IList<string> ServerErrors;
 
-            /// <summary>
-            ///   A List of quirrel errors reported by the analytics
-            ///   service.
-            /// </summary>
-            public readonly IList<MessageReport> Errors;
+			/// <summary>
+			///	  A List of quirrel errors reported by the analytics
+			///	  service.
+			/// </summary>
+			public readonly IList<MessageReport> Errors;
 
-            /// <summary>
-            ///   A List of quirrel warnings reported by the analytics
-            ///   service.
-            /// </summary>
-            public readonly IList<MessageReport> Warnings;
+			/// <summary>
+			///	  A List of quirrel warnings reported by the analytics
+			///	  service.
+			/// </summary>
+			public readonly IList<MessageReport> Warnings;
 
-            /// <summary>
-            ///   Construct a new QueryResult object with empty defaults.
-            /// </summary>
-            internal QueryResult(IList<T> data, string dataRaw, IList<string> serverErrors, IList<MessageReport> errors, IList<MessageReport> warnings)
-            {
-                Data = data;
-                DataRaw = dataRaw;
-                ServerErrors = serverErrors;
-                Errors = errors;
-                Warnings = warnings;
-            }
-        }
+			/// <summary>
+			///	  Construct a new QueryResult object with empty defaults.
+			/// </summary>
+			internal QueryResult(IList<T> data, string dataRaw, IList<string> serverErrors, IList<MessageReport> errors, IList<MessageReport> warnings)
+			{
+				Data = data;
+				DataRaw = dataRaw;
+				ServerErrors = serverErrors;
+				Errors = errors;
+				Warnings = warnings;
+			}
+		}
 
 	/// <summary>
 	/// Encapsulates an error or warning message along with position and when the message occurred.
 	/// </summary>
 	public class MessageReport
 	{
-        /// <summary>
-        ///   A description of the error/warning encountered.
-        /// </summary>
+		/// <summary>
+		///	  A description of the error/warning encountered.
+		/// </summary>
 		public string Message { get; set; }
 
-        /// <summary>
-        ///   The position, in the query, of the error/warning encountered.
-        /// </summary>
+		/// <summary>
+		///	  The position, in the query, of the error/warning encountered.
+		/// </summary>
 		public Position Position { get; set; }
 	}
 
@@ -98,19 +98,19 @@ namespace Precog.Client
 	/// </summary>
 	public class Position
 	{
-        /// <summary>
-        ///   The line of the query related to the message.
-        /// </summary>
+		/// <summary>
+		///	  The line of the query related to the message.
+		/// </summary>
 		public int Line { get; set; }
 
-        /// <summary>
-        ///   The column of the query related to the message.
-        /// </summary>
+		/// <summary>
+		///	  The column of the query related to the message.
+		/// </summary>
 		public int Column { get; set; }
 
-        /// <summary>
-        ///   Additional (optional) information related to the message.
-        /// </summary>
+		/// <summary>
+		///	  Additional (optional) information related to the message.
+		/// </summary>
 		public string Text { get; set; }
 	}
 }
