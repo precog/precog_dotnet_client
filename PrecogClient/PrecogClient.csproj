@@ -69,7 +69,7 @@
     <MakeDir Directories="$(MonodocDirectory)" />
     <MakeDir Directories="$(MonoHTMLDirectory)" />
     <Exec Command="doxygen Doxyfile" />
-    <Exec Command="mdoc update -i $(DocumentationFile) -o $(MonodocDirectory) $(OutputPath)\PrecogClient.dll" />
+    <Exec Command="mdoc update --delete -i $(DocumentationFile) -o $(MonodocDirectory) $(OutputPath)\PrecogClient.dll" />
     <Exec Command="mdoc export-html -o $(MonoHTMLDirectory) $(MonodocDirectory)" />
   </Target>
 </Project>

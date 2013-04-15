@@ -44,10 +44,12 @@ namespace Precog.Client
         /// </summary>
         public readonly int Failed;
 
+        /*
         /// <summary>
         /// The Append ID that can be used to track end-to-end storage of the events.
         /// </summary>
         public readonly IngestCompletion IngestJob;
+        */
 
         /// <summary>
         /// A List of any errors that occurred during append.
@@ -57,12 +59,12 @@ namespace Precog.Client
         /// <summary>
         ///   Create a new AppendResult instance
         /// </summary>
-        internal AppendResult(int total, int ingested, int failed, IngestCompletion ingestId, List<AppendError> errors)
+        internal AppendResult(int total, int ingested, int failed, /* IngestCompletion ingestId,*/ List<AppendError> errors)
         {
             Total = total;
             Ingested  = ingested;
             Failed  = failed;
-            IngestJob  = ingestId;
+            //IngestJob  = ingestId;
             Errors = errors;
         }
     }
