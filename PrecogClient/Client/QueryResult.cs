@@ -36,7 +36,7 @@ namespace Precog.Client
 		{
 			/// <summary>
 			/// The result data. Each element will have been deserialized to
-			/// type "T". If you want raw JSON, simply use <see cref="string"/>.
+			/// type "T".
 			/// </summary>
 			public readonly IList<T> Data;
 

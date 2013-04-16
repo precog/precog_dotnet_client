@@ -873,6 +873,29 @@ namespace Precog.Client
 		/// <summary>
 		/// Execute the given query using the specified base path. No limit, skip or sorting is performed.
 		/// </summary>
+		/// <remarks>
+		///   <para>
+		///     The result type T must have a public no-arg
+		///     constructor and properties matching the expected
+		///     return fields of the query. For example, if the query
+		///     returns results like '{"foo":12, "bar":"baz"}', you
+		///     could provide a type like
+		/// <code>
+		/// public class MyFooBar
+		/// {
+		///     public int Foo { get; set; }
+		///     public string Bar { get; set; }
+		/// }
+		/// </code>
+		///   </para>
+		///   <para>
+		///     If the provided type does not contain properties that
+		///     match the returned results, the values returned will
+		///     simply be instances constructed by the no-arg
+		///     constructor. It's the end-user's responsibility to
+		///     validate returned instances.
+		///   </para>
+		/// </remarks>
 		/// <param name='path'>
 		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:
@@ -896,6 +919,29 @@ namespace Precog.Client
 		/// <summary>
 		/// Execute the given query using the specified base path.
 		/// </summary>
+		/// <remarks>
+		///   <para>
+		///     The result type T must have a public no-arg
+		///     constructor and properties matching the expected
+		///     return fields of the query. For example, if the query
+		///     returns results like '{"foo":12, "bar":"baz"}', you
+		///     could provide a type like
+		/// <code>
+		/// public class MyFooBar
+		/// {
+		///     public int Foo { get; set; }
+		///     public string Bar { get; set; }
+		/// }
+		/// </code>
+		///   </para>
+		///   <para>
+		///     If the provided type does not contain properties that
+		///     match the returned results, the values returned will
+		///     simply be instances constructed by the no-arg
+		///     constructor. It's the end-user's responsibility to
+		///     validate returned instances.
+		///   </para>
+		/// </remarks>
 		/// <param name='path'>
 		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
 		/// For example, the following two queries are equivalent:

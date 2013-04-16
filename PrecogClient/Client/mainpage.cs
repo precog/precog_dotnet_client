@@ -9,6 +9,7 @@ For this example, we'll show account creation, ignest and query of data, followe
 
 <code>
 using Precog.Client;
+using Precog.Client.Format;
 
 public class SomeStuff
 {
@@ -22,21 +23,24 @@ public class PrecogExample
     {
         var accountInfo = PrecogClient.CreateAccount("foo@bar.com", "badPassword");
         
-        var client = new PrecogClient(accountInfo.ApiKey, accountInfo.AccountId);
+        var client = new PrecogClient(accountInfo.ApiKey, accountInfo.RootPath);
         
         // This assumes a SomeSource that can generate SomeStuff instances
         SomeStuff myStuff = SomeSource.GetStuff("foo");
-        client.Store("/test", myStuff);
+        client.Append("/test", myStuff);
         
         // Or, we could store a collection of SomeStuff instances
         List<SomeStuff> manyStuffs = SomeSource.GetLotsaStuff("foo");
-        client.StoreAll("/test", manyStuffs);
+        client.AppendAll("/test", manyStuffs);
         
         // Or, we can ingest directly from a file
-        client.StoreFile("/test", @"C:\\somefile.csv", MimeType.CSV);
+        client.AppendFromFile("/test", Formats.CSV, @"C:\somefile.csv");
+
+        // Uploading a file means we replace (e.g. delete) the existing data at that path
+        client.UploadFile("/test", Formats.CSV, @"C:\somefile.csv");
 
         // A simple query
-        var avg = client.Query<int>("/test", "average(//test)").Data[0];
+        var avg = client.Query<int>("/", "average(//test)").Data[0];
 
         // Clean out the data now that we're done
         client.Delete("/test");

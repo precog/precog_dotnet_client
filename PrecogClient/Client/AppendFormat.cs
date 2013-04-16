@@ -146,7 +146,7 @@ namespace Precog.Client.Format
 	///		This format requires a delimiter, quote character and
 	///		escape character. The escape character is used to
 	///		represent the quote character inside of quoted
-	///		values. Although the actualy delimiter is configurable,
+	///		values. Although the actual delimiter is configurable,
 	///		because we follow the general format of <a
 	///		href="http://tools.ietf.org/html/rfc4180">RFC 4180</a>,
 	///		the MIME type is text/csv.
