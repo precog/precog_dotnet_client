@@ -6,6 +6,7 @@
 *.userprefs
 
 # Generated dirs/files
+TAGS
 bin/
 docs/
 obj/
