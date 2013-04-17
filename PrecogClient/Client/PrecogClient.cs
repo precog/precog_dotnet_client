@@ -305,7 +305,11 @@ namespace Precog.Client
 
 			var request = CreateRequest(endpoint.ToString() + "accounts/v1/accounts/", "POST");
 
-			WriteRequestBody(request, SimpleJson.SerializeObject(createInfo));
+			var body = SimpleJson.SerializeObject(createInfo);
+
+			//Console.WriteLine("Sending '{0}' to '{1}'", body, request.RequestUri);
+
+			WriteRequestBody(request, body);
 
 			var result = SimpleJson.DeserializeObject<AccountCreateResponse>(ValidatedResponse(request, "creating account"));
 
@@ -684,20 +688,26 @@ namespace Precog.Client
 
 		private static HttpWebRequest CreateRequest(string url)
 		{
-			return CreateRequest(url, "GET", "application/json");
+			return CreateRequest(url, "GET", "application/json", "application/json");
 		}
 
 		private static HttpWebRequest CreateRequest(string url, string method)
 		{
-			return CreateRequest(url, method, "application/json");
+			return CreateRequest(url, method, "application/json", "application/json");
 		}
 
 		private static HttpWebRequest CreateRequest(string url, string method, string mimeType)
+		{
+			return CreateRequest(url, method, mimeType, "application/json");
+		}
+
+		private static HttpWebRequest CreateRequest(string url, string method, string mimeType, string acceptType)
 		{
 			var uri = new Uri(url);
 			var request = (HttpWebRequest) HttpWebRequest.Create(uri);
 			request.Method = method;
 			request.ContentType = mimeType;
+			request.Accept = acceptType;
 
 			return request;
 		}
@@ -718,16 +728,9 @@ namespace Precog.Client
 
 		private static void WriteRequestBody(HttpWebRequest request, string data)
 		{
-			//Console.WriteLine("Sending: " + data);
-
-			var encoding = new UTF8Encoding(false);
-			var bytes = encoding.GetBytes(data);
-
-			request.ContentLength = bytes.Length;
-
-			using (var output = request.GetRequestStream())
+			using (var output = new StreamWriter(request.GetRequestStream(), new UTF8Encoding(false)))
 			{
-				output.Write(bytes, 0, bytes.Length);
+				output.Write(data);
 			}
 		}
 
