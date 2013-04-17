@@ -48,7 +48,7 @@ namespace Precog.Client
     }
 
 	[TestFixture]
-	public class TestStore
+	public class TestClient
 	{
 		public static Uri TEST_ENDPOINT = new Uri("https://devapi.precog.com");
 
