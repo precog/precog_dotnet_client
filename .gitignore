@@ -5,8 +5,9 @@
 *.pidb
 *.userprefs
 
-# Generated dirs
+# Generated dirs/files
 bin/
 docs/
 obj/
 test-results/
+TestResult.xml

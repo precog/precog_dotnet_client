@@ -80,5 +80,5 @@
       <Output TaskParameter="Include" ItemName="TestAssembly" />
     </CreateItem>
     <NUnit Assemblies="@(TestAssembly)" ToolPath="." />
-  </Target>  
+  </Target>
 </Project>

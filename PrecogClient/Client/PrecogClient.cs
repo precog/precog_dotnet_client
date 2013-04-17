@@ -26,10 +26,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
-using Precog.Client;
-using RestSharp;
-using RestSharp.Serializers;
-using RestSharp.Deserializers;
+using System.Web;
 
 namespace Precog.Client
 {
@@ -138,17 +135,7 @@ namespace Precog.Client
 				_basePath = "/" + String.Join("/", parts.Where(x => x != ""));
 			}
 
-			_serializer = new JsonSerializer();
-			_client = CreateRestClient(endpoint);
-		}
-
-		private static RestClient CreateRestClient (Uri endpoint)
-		{
-			var client = new RestClient(endpoint.ToString());
-			// Make sure that we deserialize from JSON by default
-			client.AddHandler("*", new JsonDeserializer());
-
-			return client;
+			_endpoint = endpoint;
 		}
 
 		/// <summary>
@@ -290,7 +277,7 @@ namespace Precog.Client
 			}
 
 			AccountCreate createInfo = null;
-			if (profile != "")
+			if (profile == null || profile == "")
 			{
 				createInfo = new AccountCreate(email, password);
 			}
@@ -299,20 +286,13 @@ namespace Precog.Client
 				createInfo = new AccountCreateProfiled(email, password, profile);
 			}
 
-			var client = CreateRestClient(endpoint);
+			var request = CreateRequest(endpoint.ToString() + "accounts/v1/accounts/", "POST");
 
-			var request = new RestRequest("/accounts/v1/accounts/", Method.POST);
-			request.RequestFormat = DataFormat.Json;
-			request.AddBody(createInfo);
+			WriteRequestBody(request, SimpleJson.SerializeObject(createInfo));
 
-			IRestResponse<AccountCreateResponse> response = client.Execute<AccountCreateResponse>(request);
+			var result = SimpleJson.DeserializeObject<AccountCreateResponse>(ValidatedResponse(request, "creating account"));
 
-			if (response.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException("Error creating account: " + response.Content);
-			}
-
-			return AccountDetails(endpoint, email, password, response.Data.accountId);
+			return AccountDetails(endpoint, email, password, result.accountId);
 		}
 
 		/// <summary>
@@ -397,20 +377,44 @@ namespace Precog.Client
 				throw new PrecogException("HTTPS is required for all account-related operations. Invalid endpoint: " + endpoint);
 			}
 
-			// We need a new client here specifically to allow for BASIC auth
-			var infoClient = CreateRestClient(endpoint);
-			infoClient.Authenticator = new HttpBasicAuthenticator(email, password);
-			var infoRequest = new RestRequest("/accounts/v1/accounts/" + accountId, Method.GET);
-			infoRequest.RequestFormat = DataFormat.Json;
+			var request = CreateRequest(endpoint.ToString() + "accounts/v1/accounts/" + accountId);
+			var credentials = new NetworkCredential(email, password);
 
-			var response = infoClient.Execute<AccountInfo>(infoRequest);
+			request.Credentials = credentials;
+			request.PreAuthenticate = true;
 
-			if (response.StatusCode != HttpStatusCode.OK)
+			var response = ValidatedResponse(request, "fetching account details");
+
+			var result = SimpleJson.DeserializeObject<JsonObject>(response);
+
+			var profile = "";
+
+			if (result.Keys.Contains("profile"))
 			{
-				throw new PrecogException("Error retrieving account details: " + response.Content);
+				profile = (string) result["rootPath"];
 			}
 
-			return response.Data;
+			var accountId2 = (string) result["accountId"];
+			var email2 = (string) result["email"];
+			var createdAt = DateTime.Parse((string) result["accountCreationDate"]);
+			var passwordChangeAt = DateTime.Parse((string) result["lastPasswordChangeTime"]);
+			var apiKey = (string) result["apiKey"];
+			var rootPath = (string) result["rootPath"];
+			var plan = (string) ((JsonObject) result["plan"])["type"];
+
+			var info = new AccountInfo(accountId2,
+									   email2,
+									   createdAt,
+									   passwordChangeAt,
+									   apiKey,
+									   rootPath,
+									   profile,
+									   plan);
+
+			//Console.WriteLine("Got response: " + response);
+			//Console.WriteLine("Got info: " + SimpleJson.SerializeObject(info));
+
+			return info;
 		}
 
 		/// <summary>
@@ -461,21 +465,11 @@ namespace Precog.Client
 				paramString += ("&ownerAccountId=" + ownerAccountId);
 			}
 
-			var request = new RestRequest(Services.INGEST + _basePath + path + paramString + format.RequestParameters(), Method.POST);
-			// Although we're raw on input, we need this to properly deserialize the result
-			request.RequestFormat = DataFormat.Json;
+			var request = CreateRequest(_endpoint.ToString() + Services.INGEST + _basePath + path + paramString + format.RequestParameters(), "POST", format.ContentType);
 
-			// We bypass serialization here, since we're "raw"
-			request.AddParameter(format.ContentType, content, ParameterType.RequestBody);
+			WriteRequestBody(request, content);
 
-			IRestResponse response = _client.Execute(request);
-
-			if (response.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException("Error appending data: " + response.Content);
-			}
-
-			return DeserializeAppendResult(response.Content);
+			return DeserializeAppendResult(ValidatedResponse(request, "appending data"));
 		}
 
 		/// <summary>
@@ -571,44 +565,30 @@ namespace Precog.Client
 		/// </param>
 		public AppendResult AppendRawStream(string path, AppendFormat format, long contentLength, Stream content, string ownerAccountId)
 		{
-			var uriString = String.Format ("{0}/ingest/v1/fs{1}{2}?{3}={4}&mode=batch&receipt=true", _client.BaseUrl, _basePath, path, Params.API_KEY, _apiKey);
+			var uriString = String.Format ("{0}ingest/v1/fs{1}{2}?{3}={4}&mode=batch&receipt=true", _endpoint.ToString(), _basePath, path, Params.API_KEY, _apiKey);
 
 			if (ownerAccountId != null)
 			{
 				uriString += ("&ownerAccountId=" + ownerAccountId);
 			}
 
-			// RestSharp doesn't do raw bodies (?!?!?!)
-			HttpWebRequest http = (HttpWebRequest) HttpWebRequest.Create(uriString);
-
-			http.Method = "POST";
-			http.ContentType = format.ContentType;
+			var request =  CreateRequest(uriString, "POST", format.ContentType);
 
 			if (contentLength > 0)
 			{
-				http.ContentLength = contentLength;
+				request.ContentLength = contentLength;
 			}
 			else
 			{
-				http.SendChunked = true;
+				request.SendChunked = true;
 			}
 
-			using (Stream output = http.GetRequestStream())
+			using (Stream output = request.GetRequestStream())
 			{
 				content.CopyTo(output);
 			}
 
-			using (HttpWebResponse response = (HttpWebResponse) http.GetResponse())
-			{
-				var body = ReadResponseBody(response);
-
-				if (response.StatusCode != HttpStatusCode.OK)
-				{
-					throw new PrecogException("Error appending data: " + body);
-				}
-
-				return DeserializeAppendResult(body);
-			}
+			return DeserializeAppendResult(ValidatedResponse(request, "appending data"));
 		}
 
 		private AppendResult DeserializeAppendResult(string rawContent)
@@ -633,20 +613,77 @@ namespace Precog.Client
 									errors);
 		}
 
+		private static HttpWebRequest CreateRequest(string url)
+		{
+			return CreateRequest(url, "GET", "application/json");
+		}
+
+		private static HttpWebRequest CreateRequest(string url, string method)
+		{
+			return CreateRequest(url, method, "application/json");
+		}
+
+		private static HttpWebRequest CreateRequest(string url, string method, string mimeType)
+		{
+			var uri = new Uri(url);
+			var request = (HttpWebRequest) HttpWebRequest.Create(uri);
+			request.Method = method;
+			request.ContentType = mimeType;
+
+			return request;
+		}
+
 		/// <summary>
 		///	  Reads the response content into a string for parsing/processing
 		/// </summary>
-		private string ReadResponseBody(HttpWebResponse response)
+		private static string ReadResponseBody(HttpWebResponse response)
 		{
-			var buffer = new byte[response.ContentLength];
+			var body  = "";
+			using (StreamReader sr = new StreamReader(response.GetResponseStream(), new UTF8Encoding()))
+			{
+				body = sr.ReadToEnd();
+			}
 
-			var input = response.GetResponseStream();
+			return body;
+		}
 
-			// Downcasting to an int is safe here because we know that
-			// we'll only ever return small messages/JSON
-			input.Read(buffer, 0, (int) response.ContentLength);
+		private static void WriteRequestBody(HttpWebRequest request, string data)
+		{
+			//Console.WriteLine("Sending: " + data);
 
-			return System.Text.UTF8Encoding.UTF8.GetString(buffer);
+			var encoding = new UTF8Encoding(false);
+			var bytes = encoding.GetBytes(data);
+
+			request.ContentLength = bytes.Length;
+
+			using (var output = request.GetRequestStream())
+			{
+				output.Write(bytes, 0, bytes.Length);
+			}
+		}
+
+		private static string ValidatedResponse(HttpWebRequest request, string description)
+		{
+			return ValidatedResponse(request, description, HttpStatusCode.OK);
+		}
+
+		private static string ValidatedResponse(HttpWebRequest request, string description, HttpStatusCode expectedCode)
+		{
+			//Console.WriteLine("Running {0} {1}", request.Method, request.RequestUri);
+
+			using (HttpWebResponse response = (HttpWebResponse) request.GetResponse())
+			{
+				var body = ReadResponseBody(response);
+
+				//Console.WriteLine("Got: " + body);
+
+				if (response.StatusCode != expectedCode)
+				{
+					throw new PrecogException("Error {0} against {1}. RC = {2}, content = {3}", request.RequestUri, response.StatusCode, body);
+				}
+
+				return body;
+			}
 		}
 
 		/// <summary>
@@ -792,7 +829,7 @@ namespace Precog.Client
 		/// </param>
 		public AppendResult Append<T>(string path, T record, string ownerAccountId)
 		{
-			return AppendRaw(path, Formats.JSON, _serializer.Serialize(record), ownerAccountId);
+			return AppendRaw(path, Formats.JSON, SimpleJson.SerializeObject(record), ownerAccountId);
 		}
 
 		/// <summary>
@@ -839,7 +876,7 @@ namespace Precog.Client
 		/// </param>
 		public AppendResult AppendAll<T>(string path, IEnumerable<T> records, string ownerAccountId)
 		{
-			return AppendRaw(path, Formats.JSON, _serializer.Serialize(records), ownerAccountId);
+			return AppendRaw(path, Formats.JSON, SimpleJson.SerializeObject(records), ownerAccountId);
 		}
 
 		/// <summary>
@@ -860,14 +897,9 @@ namespace Precog.Client
 				throw new ArgumentException("Invalid path provided. Paths must start with '/': " + path);
 			}
 
-			var request = new RestRequest(Services.INGEST + _basePath + path + "?apiKey=" + _apiKey, Method.DELETE);
+			var request = CreateRequest(_endpoint.ToString() + Services.INGEST + _basePath + path + "?apiKey=" + _apiKey, "DELETE");
 
-			var result = _client.Execute(request);
-
-			if (result.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException("Error deleting data: " + result.Content);
-			}
+			ValidatedResponse(request, "deleting data");
 		}
 
 		/// <summary>
@@ -962,13 +994,12 @@ namespace Precog.Client
 		/// </typeparam>
 		public QueryResult<T> Query<T>(string path, string query, QueryOptions options) where T: new()
 		{
-			var result = QueryInternal<JsonObject>(path, query, options);
-
-			return DeserializeQueryResult<T>(result.Content);
+			return DeserializeQueryResult<T>(QueryInternal(path, query, options));
 		}
 
 		private QueryResult<T> DeserializeQueryResult<T>(string rawContent) where T : new()
 		{
+			//Console.WriteLine("Deserializing " + rawContent);
 			var raw = SimpleJson.DeserializeObject<JsonObject>(rawContent);
 
 			// The following code works around a yet-to-be-determined bug in RestSharp deserialization of nested classes
@@ -1007,7 +1038,7 @@ namespace Precog.Client
 		/// </param>
 		public String QueryRaw(string path, string query)
 		{
-			return QueryInternal<JsonObject>(path, query, new QueryOptions()).Content;
+			return QueryInternal(path, query, new QueryOptions());
 		}
 
 		/// <summary>
@@ -1030,7 +1061,7 @@ namespace Precog.Client
 		/// </param>
 		public String QueryRaw(string path, string query, QueryOptions options)
 		{
-			return QueryInternal<JsonObject>(path, query, options).Content;
+			return QueryInternal(path, query, options);
 		}
 
 		/// <summary>
@@ -1064,16 +1095,11 @@ namespace Precog.Client
 		{
 			ValidatePath(path);
 
-			var request = new RestRequest(Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, _basePath + path, query), Method.POST);
+			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, HttpUtility.UrlEncode(_basePath + path), HttpUtility.UrlEncode(query)), "POST");
 
-			var response = _client.Execute<AsyncQuery>(request);
+			var result =  SimpleJson.DeserializeObject<JsonObject>(ValidatedResponse(request, "querying", HttpStatusCode.Accepted));
 
-			if (response.StatusCode != HttpStatusCode.Accepted)
-			{
-				throw new PrecogException("Error during async query : " + response.Content);
-			}
-
-			return response.Data;
+			return new AsyncQuery((string) result["jobId"]);
 		}
 
 		/// <summary>
@@ -1095,16 +1121,9 @@ namespace Precog.Client
 		/// <returns>The raw JSON result object from the query.</returns>
 		public string QueryResultsRaw(AsyncQuery query)
 		{
-			var request = new RestRequest(Services.ANALYTICS_ASYNC + String.Format("/{0}?apiKey={1}", query.JobId, _apiKey), Method.GET);
+			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("/{0}?apiKey={1}", query.JobId, _apiKey));
 
-			var response = _client.Execute(request);
-
-			if (response.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException("Error retrieving async results ({0}): {1}", response.StatusCode, response.Content);
-			}
-
-			return response.Content;
+			return ValidatedResponse(request, "obtaining query results");
 		}
 
 		/// <summary>
@@ -1148,7 +1167,7 @@ namespace Precog.Client
 		/// </example>
 		public void DownloadQueryResults(AsyncQuery query, string filename)
 		{
-			var uriString = String.Format ("{0}/analytics/v1/queries/{1}?apiKey={2}", _client.BaseUrl, query.JobId,	 _apiKey);
+			var uriString = String.Format ("{0}analytics/v1/queries/{1}?apiKey={2}", _endpoint.ToString(), query.JobId, _apiKey);
 
 			// RestSharp doesn't do raw bodies (?!?!?!)
 			HttpWebRequest http = (HttpWebRequest) HttpWebRequest.Create(uriString);
@@ -1166,52 +1185,40 @@ namespace Precog.Client
 				{
 					response.GetResponseStream().CopyTo(output);
 				}
-			}			 
+			}
 		}
 
-		private IRestResponse<T> QueryInternal<T>(string path, string query, QueryOptions options) where T: new()
+		private string QueryInternal(string path, string query, QueryOptions options)
 		{
 			var finalPath = ValidatePath(path);
 
-			var request = new RestRequest(Services.ANALYTICS + _basePath + finalPath, Method.GET);
-			request.RequestFormat = DataFormat.Json;
+			var queryParams = String.Format("?format=detailed&apiKey={0}&q={1}", _apiKey, HttpUtility.UrlEncode(query));
 
 			if (options.Limit > 0)
 			{
-				request.AddParameter("limit", options.Limit);
+				queryParams += "&limit=" + options.Limit;
 			}
 
 			if (options.Skip != 0)
 			{
-				request.AddParameter("skip", options.Skip);
+				queryParams += "&skip" +  options.Skip;
 			}
 
 			if (options.SortOn != null)
 			{
-				request.AddParameter("sortOn", "[" + String.Join(",", options.SortOn) + "]");
+				var sortOrder = "asc";
 
-				if (options.SortOrder == QueryOptions.Order.ASCENDING)
+				if (options.SortOrder == QueryOptions.Order.DESCENDING)
 				{
-					request.AddParameter("sortOrder", "asc");
+					sortOrder = "desc";
 				}
-				else
-				{
-					request.AddParameter("sortOrder", "desc");
-				}
+
+				queryParams += String.Format("&sortOn={0}&sortOrder={1}", "[" + String.Join(",", options.SortOn) + "]", sortOrder);
 			}
 
-			request.AddParameter(Params.QUERY, query);
-			request.AddParameter(Params.API_KEY, _apiKey);
-			request.AddParameter("format", "detailed");
+			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS + _basePath + finalPath + queryParams);
 
-			var response = _client.Execute<T>(request);
-
-			if (response.StatusCode != HttpStatusCode.OK)
-			{
-				throw new PrecogException(response.Content);
-			}
-
-			return response;
+			return ValidatedResponse(request, "querying");
 		}
 
 		private string ValidatePath(string path)
@@ -1227,7 +1234,7 @@ namespace Precog.Client
 			}
 
 			// Horrid workaround for overzealous RestSharp RESTification of GET URIs
-			return path == "/" ? "//" : path;
+			return path;
 		}
 
 		private static class Params
@@ -1239,14 +1246,13 @@ namespace Precog.Client
 
 		private static class Services
 		{
-			public const string INGEST	  = "/ingest/v1/fs";
-			public const string ANALYTICS = "/analytics/v1/fs";
-			public const string ANALYTICS_ASYNC = "/analytics/v1/queries";
+			public const string INGEST	  = "ingest/v1/fs";
+			public const string ANALYTICS = "analytics/v1/fs";
+			public const string ANALYTICS_ASYNC = "analytics/v1/queries";
 		}
 
-		private RestClient _client;
+		private Uri _endpoint;
 		private string _apiKey;
 		private string _basePath;
-		private JsonSerializer _serializer;
 	}
 }

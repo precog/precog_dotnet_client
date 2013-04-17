@@ -23,7 +23,7 @@
 namespace Precog.Client
 {
 	/// <summary>
-	///	  Represents the identifier for an asynchronous query (see <see cref="PrecogClient.QueryAsync" />). 
+	///	  Represents the identifier for an asynchronous query (see <see cref="PrecogClient.QueryAsync" />).
 	/// </summary>
 	public class AsyncQuery
 	{
@@ -33,7 +33,7 @@ namespace Precog.Client
 		public string JobId { get; set; }
 
 		/// <summary>
-		///	  Construct an empty AsyncQuery result. 
+		///	  Construct an empty AsyncQuery result.
 		/// </summary>
 		public AsyncQuery() : this("")
 		{
@@ -50,7 +50,7 @@ namespace Precog.Client
 
 	/*
 	/// <summary>
-	///	  Represents 
+	///	  Represents
 	/// </summary>
 	public class IngestCompletion
 	{
@@ -59,7 +59,7 @@ namespace Precog.Client
 		public IngestCompletion(string id)
 		{
 			Id = id;
-		}		 
+		}
 	}
 	*/
 }

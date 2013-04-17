@@ -114,7 +114,6 @@ namespace Precog.Client
         [Test]
         public void TestAccountCreation()
         {
-            
 			accountInfo = PrecogClient.CreateAccount(TEST_ENDPOINT, email, password);
 
 			client = new PrecogClient(TEST_ENDPOINT, accountInfo.ApiKey, accountInfo.AccountId);
@@ -255,6 +254,7 @@ namespace Precog.Client
 			while (retries > 0)
 			{
 				try {
+					Console.WriteLine("Running count query");
 					var result = client.Query<int>("/", String.Format("count(load(\"{0}\"))", path));
 
 					if (result.Data[0] == expected)

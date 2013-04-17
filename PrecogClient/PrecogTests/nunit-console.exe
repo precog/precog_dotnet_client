@@ -13,4 +13,4 @@ for i in `seq 0 $#`; do
     fi
 done
 
-exec nunit-console -nologo -labels "${files[@]}"
+exec cli --debug /usr/lib/nunit/nunit-console.exe -noshadow -nologo -labels "${files[@]}"

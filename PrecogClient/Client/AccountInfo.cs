@@ -47,6 +47,11 @@ namespace Precog.Client
 		public DateTime AccountCreationDate { get; set; }
 
 		/// <summary>
+		///   The timestamp for the last password change
+		/// </summary>
+		public DateTime LastPasswordChangeTime { get; set; }
+
+		/// <summary>
 		///	  The api key for this account.
 		/// </summary>
 		public string ApiKey { get; set; }
@@ -64,45 +69,31 @@ namespace Precog.Client
 		/// </summary>
 		public string Profile { get; set; }
 
-		private string _plan = "Free";
-
 		/// <summary>
 		///	  The plan type for this account.
 		/// </summary>
-		public string Plan
-		{
-			get
-			{
-				return _plan;
-			}
-			set
-			{
-				if (value.ToLower().Contains("type"))
-				{
-					var parsed = SimpleJson.DeserializeObject<JsonObject>(value);
-					_plan = (string) parsed["type"];
-				}
-				else
-				{
-					_plan = value;
-				}
-			}
-		}
+		public string Plan { get; set; }
 
 		/// <summary>
 		///	  Create an empty AccountInfo instance.
 		/// </summary>
-		public AccountInfo()
+		internal AccountInfo(string accountId,
+							 string email,
+							 DateTime creationDate,
+							 DateTime passwordChange,
+							 string apiKey,
+							 string rootPath,
+							 string profile,
+							 string plan)
 		{
-			AccountId  = "";
-			Email  = "";
-			AccountCreationDate	 = DateTime.Now;
-			ApiKey	= "";
-			RootPath  = "";
-			Profile	 = "";
-			Plan = "";
-			// Everything else should come from the REST result. This is optional, so we make sure to fill it in.
-			Profile = "";
+			AccountId  = accountId;
+			Email  = email;
+			AccountCreationDate = creationDate;
+			LastPasswordChangeTime = passwordChange;
+			ApiKey	= apiKey;
+			RootPath  = rootPath;
+			Profile	 = profile;
+			Plan = plan;
 		}
 	}
 }
