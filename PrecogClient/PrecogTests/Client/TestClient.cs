@@ -116,7 +116,7 @@ namespace Precog.Client
         {
 			accountInfo = PrecogClient.CreateAccount(TEST_ENDPOINT, email, password);
 
-			client = new PrecogClient(TEST_ENDPOINT, accountInfo.ApiKey, accountInfo.AccountId);
+			client = new PrecogClient(TEST_ENDPOINT, accountInfo.ApiKey, accountInfo.RootPath);
         }
 
 		[Test]
