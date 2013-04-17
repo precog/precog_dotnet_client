@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>PrecogClient</id>
+    <version>1.0.0</version>
+    <title>The .Net Client for Precog</title>
+    <authors>ReportGrid, Inc.</authors>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/precog/precog_dotnet_client</projectUrl>
+    <iconUrl>https://raw.github.com/precog/precog_dotnet_client/master/icon-precog-32x32.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      This is the .Net client for Precog, a cloud-based analytics
+      platform. For more information, please visit our website at
+      http://www.precog.com. This package bundles the API documentation
+      under the docs subdirectory.
+    </description>
+    <releaseNotes>This is the initial release of this client.</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>precog client</tags>
+  </metadata>
+  <files>
+    <file src="bin/Debug/PrecogClient.dll" target="lib/net40" />
+    <file src="bin/Debug/PrecogClient.dll.mdb" target="lib/net40" />
+    <file src="docs/html/**/*" target="docs" />
+  </files>
+</package>

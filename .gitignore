@@ -12,3 +12,4 @@ docs/
 obj/
 test-results/
 TestResult.xml
+*.nupkg
