@@ -80,7 +80,7 @@ namespace Precog.Client
 		/// Thrown if the apiKey or basePath is null.
 		/// </exception>
 		/// <exception cref='ArgumentException'>
-		/// Thrown if the apiKey is empty.
+		/// Thrown if the apiKey is empty or if basePath is invalid.
 		/// </exception>
 		public PrecogClient(string apiKey, string basePath): this(DEFAULT_ENDPOINT, apiKey, basePath) {}
 
@@ -88,7 +88,7 @@ namespace Precog.Client
 		/// Creates a new client.
 		/// </summary>
 		/// <param name='endpoint'>
-		/// The endpoint URI to use for client operations.
+		/// The endpoint URI to use for client operations. This is not required to be HTTPS.
 		/// </param>
 		/// <param name='apiKey'>
 		/// The api key for this client.
@@ -97,28 +97,17 @@ namespace Precog.Client
 		/// The base path to use for operations with this client.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Thrown if the apiKey or basePath is null.
+		/// Thrown if the endpoint, apiKey or basePath is null.
 		/// </exception>
 		/// <exception cref='ArgumentException'>
-		/// Thrown if the apiKey is empty.
+		/// Thrown if the apiKey is empty or if basePath is invalid.
 		/// </exception>
 		public PrecogClient(Uri endpoint, string apiKey, string basePath)
 		{
-			if (apiKey == null)
-			{
-				throw new ArgumentNullException("apiKey must not be null");
-			}
+			ValidateArg(endpoint, "endpoint");
+			ValidateArg(apiKey, "apiKey");
+			ValidatePath(basePath);
 
-			if (apiKey == "")
-			{
-				throw new ArgumentException("apiKey must not be empty");
-			}
-
-			if (basePath == null)
-			{
-				throw new ArgumentNullException("basePath must not be null");
-			}
-			//
 			_apiKey = apiKey;
 
 			// Make sure that the base path doesn't end with "/" so that
@@ -183,6 +172,12 @@ namespace Precog.Client
 		/// Profile data, in JSON format, to be associated with the account. Profile data is not validated,
 		/// so invalid JSON can potentially cause account creation to fail.
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email or password is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the email or password is null.
+		/// </exception>
 		public static AccountInfo CreateAccount(String email, String password, String profile)
 		{
 			return CreateAccount(DEFAULT_ENDPOINT, email, password, profile);
@@ -211,6 +206,12 @@ namespace Precog.Client
 		/// data is serialized to JSON internally. If control over
 		/// serialization is required, use the <see cref="M:CreateAccount(string, string, string)" /> method.
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email or password is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the email or password is null.
+		/// </exception>
 		public static AccountInfo CreateAccount(String email, String password, object profile)
 		{
 			return CreateAccount(DEFAULT_ENDPOINT, email, password, SimpleJson.SerializeObject(profile));
@@ -237,6 +238,12 @@ namespace Precog.Client
 		/// <param name='password'>
 		/// user's password
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email or password is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the endpoint, email or password is null.
+		/// </exception>
 		public static AccountInfo CreateAccount(Uri endpoint, String email, String password)
 		{
 			return CreateAccount(endpoint, email, password, "");
@@ -269,8 +276,18 @@ namespace Precog.Client
 		/// Profile data, in JSON format, to be associated with the account. Profile data is not validated,
 		/// so invalid JSON can potentially cause account creation to fail.
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email or password is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the endpoint, email or password is null.
+		/// </exception>
 		public static AccountInfo CreateAccount(Uri endpoint, String email, String password, String profile)
 		{
+			ValidateArg(endpoint, "endpoint");
+			ValidateArg(email, "email");
+			ValidateArg(password, "password");
+
 			if (endpoint.Scheme != "https")
 			{
 				throw new PrecogException("HTTPS is required for all account-related operations. Invalid endpoint: " + endpoint);
@@ -323,6 +340,12 @@ namespace Precog.Client
 		/// data is serialized to JSON internally. If control over
 		/// serialization is required, use the <see cref="M:CreateAccount(Uri, string, string, string)" /> method.
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email or password is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the endpoint, email or password is null.
+		/// </exception>
 		public static AccountInfo CreateAccount(Uri endpoint, String email, String password, object profile)
 		{
 			return CreateAccount(endpoint, email, password, SimpleJson.SerializeObject(profile));
@@ -345,6 +368,12 @@ namespace Precog.Client
 		/// <param name='accountId'>
 		/// account's id number
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email, password or accountId is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the email, password or accountid is null.
+		/// </exception>
 		public static AccountInfo AccountDetails(string email, string password, string accountId)
 		{
 			return AccountDetails(DEFAULT_ENDPOINT, email, password, accountId);
@@ -370,8 +399,19 @@ namespace Precog.Client
 		/// <param name='accountId'>
 		/// account's id number
 		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if the email, password or accountId is empty.
+		/// </exception>
+		/// <exception cref='ArgumentNullException'>
+		/// Thrown if the endpoint, email, password or accountid is null.
+		/// </exception>
 		public static AccountInfo AccountDetails(Uri endpoint, string email, string password, string accountId)
 		{
+			ValidateArg(endpoint, "endpoint");
+			ValidateArg(email, "email");
+			ValidateArg(password, "password");
+			ValidateArg(accountId, "accountId");
+
 			if (endpoint.Scheme != "https")
 			{
 				throw new PrecogException("HTTPS is required for all account-related operations. Invalid endpoint: " + endpoint);
@@ -432,7 +472,7 @@ namespace Precog.Client
 		/// </code>
 		/// </example>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -446,14 +486,24 @@ namespace Precog.Client
 		/// api key for this client. null indicates omission.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the specified content is empty or null.
+		/// Is thrown if the path, format or content is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or content is empty.
 		/// </exception>
 		public AppendResult AppendRaw(string path, AppendFormat format, string content, string ownerAccountId)
 		{
-			if (content == null || content=="") {
+			if (content == null)
+			{
 				throw new ArgumentNullException("argument 'content' must contain a non empty value formatted as described by type");
 			}
 
+			if (content == "")
+			{
+				throw new ArgumentException("argument 'content' must contain a non empty value formatted as described by type");
+			}
+
+			ValidateArg(format, "format");
 			ValidatePath(path);
 
 			// RestSharp, sadly, adheres to the spec and won't put params in the URI when using POST method
@@ -487,7 +537,7 @@ namespace Precog.Client
 		/// </code>
 		/// </example>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -496,7 +546,10 @@ namespace Precog.Client
 		/// The content to be appended. No processing is performed on this content.
 		/// </param>
 		/// <exception cref='ArgumentNullException'>
-		/// Is thrown if the specified content is empty or null.
+		/// Is thrown if the path, format or content is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or content is empty.
 		/// </exception>
 		public AppendResult AppendRaw(string path, AppendFormat format, string content)
 		{
@@ -519,7 +572,7 @@ namespace Precog.Client
 		/// </example>
 		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -527,6 +580,12 @@ namespace Precog.Client
 		/// <param name='content'>
 		/// The content to be appended. No processing is performed on this content.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or content is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult AppendRawStream(string path, AppendFormat format, Stream content)
 		{
 			return AppendRawStream(path, format, 0, content, null);
@@ -547,7 +606,7 @@ namespace Precog.Client
 		/// </example>
 		/// </description>
 		/// <param name='path'>
-		/// The storage path for the data.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -563,8 +622,18 @@ namespace Precog.Client
 		/// is only required if the account cannot be deduced from the
 		/// api key for this client. null indicates omission.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or content is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult AppendRawStream(string path, AppendFormat format, long contentLength, Stream content, string ownerAccountId)
 		{
+			ValidatePath(path);
+			ValidateArg(format, "format");
+			ValidateArg(content, "content");
+
 			var uriString = String.Format ("{0}ingest/v1/fs{1}{2}?{3}={4}&mode=batch&receipt=true", _endpoint.ToString(), _basePath, path, Params.API_KEY, _apiKey);
 
 			if (ownerAccountId != null)
@@ -690,7 +759,7 @@ namespace Precog.Client
 		/// Appends the file specified at the given path with the given MIME type.
 		/// </summary>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -698,6 +767,15 @@ namespace Precog.Client
 		/// <param name='filename'>
 		/// The name of the file to append.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or filename is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or file content is empty.
+		/// </exception>
+		/// <exception cref='System.IO.FileNotFoundException'>
+		/// Is thrown if the filename does not correspond to a file.
+		/// </exception>
 		public AppendResult AppendFromFile(string path, AppendFormat format, string filename)
 		{
 			return AppendFromFile(path, format, filename, null);
@@ -707,7 +785,7 @@ namespace Precog.Client
 		/// Appends the file specified at the given path with the given MIME type and owner account Id.
 		/// </summary>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -720,8 +798,22 @@ namespace Precog.Client
 		/// is only required if the account cannot be deduced from the
 		/// api key for this client. null indicates omission.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or filename is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or file content is empty.
+		/// </exception>
+		/// <exception cref='System.IO.FileNotFoundException'>
+		/// Is thrown if the filename does not correspond to a file.
+		/// </exception>
 		public AppendResult AppendFromFile(string path, AppendFormat format, string filename, string ownerAccountId)
 		{
+			if ((new FileInfo(filename)).Length == 0)
+			{
+				throw new ArgumentException("The file {0} is empty and cannot be appended.", filename);
+			}
+
 			using (FileStream input = new FileStream(filename, FileMode.Open))
 			{
 				return AppendRawStream(path, format, (new FileInfo(filename)).Length, input, ownerAccountId);
@@ -732,7 +824,7 @@ namespace Precog.Client
 		/// Uploads the file specified at the given path, overwriting any existing data at that path.
 		/// </summary>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -740,6 +832,15 @@ namespace Precog.Client
 		/// <param name='filename'>
 		/// The name of the file to append.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or filename is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or file content is empty.
+		/// </exception>
+		/// <exception cref='System.IO.FileNotFoundException'>
+		/// Is thrown if the filename does not correspond to a file.
+		/// </exception>
 		public AppendResult UploadFile(string path, AppendFormat format, string filename)
 		{
 			return UploadFile(path, format, filename, null);
@@ -749,7 +850,7 @@ namespace Precog.Client
 		/// Uploads the file specified at the given path, overwriting any existing data at that path.
 		/// </summary>
 		/// <param name='path'>
-		/// The storage path for the data in the file.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='format'>
 		/// Indicates the content type of the append data.
@@ -762,6 +863,15 @@ namespace Precog.Client
 		/// is only required if the account cannot be deduced from the
 		/// api key for this client. null indicates omission.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, format or filename is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path or file content is empty.
+		/// </exception>
+		/// <exception cref='System.IO.FileNotFoundException'>
+		/// Is thrown if the filename does not correspond to a file.
+		/// </exception>
 		public AppendResult UploadFile(string path, AppendFormat format, string filename, string ownerAccountId)
 		{
 			Delete(path);
@@ -798,11 +908,17 @@ namespace Precog.Client
 		/// </code>
 		/// </example>
 		/// <param name='path'>
-		/// The storage path for the record.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='record'>
 		/// A serializable record object.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or record is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult Append<T>(string path, T record)
 		{
 			return Append<T>(path, record, null);
@@ -817,7 +933,7 @@ namespace Precog.Client
 		///	  </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The storage path for the record.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='record'>
 		/// A serializable record object.
@@ -827,8 +943,15 @@ namespace Precog.Client
 		/// is only required if the account cannot be deduced from the
 		/// api key for this client. null indicates omission.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or record is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult Append<T>(string path, T record, string ownerAccountId)
 		{
+			ValidateArg(record, "record");
 			return AppendRaw(path, Formats.JSON, SimpleJson.SerializeObject(record), ownerAccountId);
 		}
 
@@ -843,11 +966,17 @@ namespace Precog.Client
 		///	  </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The storage path for the record.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='records'>
 		/// A collection of serializable objects.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or records are null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult AppendAll<T>(string path, IEnumerable<T> records)
 		{
 			return AppendAll<T>(path, records, null);
@@ -864,7 +993,7 @@ namespace Precog.Client
 		///	  </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The storage path for the record.
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
 		/// <param name='records'>
 		/// A collection of serializable objects.
@@ -874,8 +1003,15 @@ namespace Precog.Client
 		/// is only required if the account cannot be deduced from the
 		/// api key for this client. null indicates omission.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or records are null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty.
+		/// </exception>
 		public AppendResult AppendAll<T>(string path, IEnumerable<T> records, string ownerAccountId)
 		{
+			ValidateArg(records, "records");
 			return AppendRaw(path, Formats.JSON, SimpleJson.SerializeObject(records), ownerAccountId);
 		}
 
@@ -888,14 +1024,17 @@ namespace Precog.Client
 		///	  </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The path. E.g. "/1234567890/test" maps to "/ingest/v1/fs/1234567890/test".
+		/// The storage path for the data. The path must begin with a "/"
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/".
+		/// </exception>
 		public void Delete(string path)
 		{
-			if (path == null || ! path.StartsWith("/"))
-			{
-				throw new ArgumentException("Invalid path provided. Paths must start with '/': " + path);
-			}
+			ValidatePath(path);
 
 			var request = CreateRequest(_endpoint.ToString() + Services.INGEST + _basePath + path + "?apiKey=" + _apiKey, "DELETE");
 
@@ -929,8 +1068,9 @@ namespace Precog.Client
 		///   </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
-		/// For example, the following two queries are equivalent:
+		/// The base path for the query (must begin with "/"). If "/",
+		/// all paths inside the query must be fully-specified.  For
+		/// example, the following two queries are equivalent:
 		/// <code>
 		/// client.Query("/test", "count(//foo)");
 		/// client.Query("/", "count(//foo/test)");
@@ -943,6 +1083,12 @@ namespace Precog.Client
 		/// The result type for the query. The underlying JSON result will be
 		/// deserialized to this type.
 		/// </typeparam>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or query is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/", or if the query is empty.
+		/// </exception>
 		public QueryResult<T> Query<T>(string path, string query) where T: new()
 		{
 			return Query<T>(path, query, new QueryOptions());
@@ -975,8 +1121,9 @@ namespace Precog.Client
 		///   </para>
 		/// </remarks>
 		/// <param name='path'>
-		/// The base path for the query. If "/", all paths inside the query must be fully-specified.
-		/// For example, the following two queries are equivalent:
+		/// The base path for the query (must begin with "/"). If "/",
+		/// all paths inside the query must be fully-specified.  For
+		/// example, the following two queries are equivalent:
 		/// <code>
 		/// client.Query("/test", "count(//foo)");
 		/// client.Query("/", "count(//foo/test)");
@@ -992,6 +1139,12 @@ namespace Precog.Client
 		/// The result type for the query. The underlying JSON result will be
 		/// deserialized to this type.
 		/// </typeparam>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or query is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/", or if the query is empty.
+		/// </exception>
 		public QueryResult<T> Query<T>(string path, string query, QueryOptions options) where T: new()
 		{
 			return DeserializeQueryResult<T>(QueryInternal(path, query, options));
@@ -1036,6 +1189,12 @@ namespace Precog.Client
 		/// <param name='query'>
 		/// The quirrel query string. No quoting is required.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or query is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/", or if the query is empty.
+		/// </exception>
 		public String QueryRaw(string path, string query)
 		{
 			return QueryInternal(path, query, new QueryOptions());
@@ -1059,6 +1218,12 @@ namespace Precog.Client
 		/// <param name='options'>
 		/// Options controlling the results such as skip, limit, and sorting.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path, query or options are null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/", or if the query is empty.
+		/// </exception>
 		public String QueryRaw(string path, string query, QueryOptions options)
 		{
 			return QueryInternal(path, query, options);
@@ -1091,9 +1256,16 @@ namespace Precog.Client
 		/// <param name='query'>
 		/// The quirrel query string. No quoting is required.
 		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the path or query is null.
+		/// </exception>
+		/// <exception cref='ArgumentException'>
+		/// Is thrown if the path is empty or does not start with a "/", or if the query is empty.
+		/// </exception>
 		public AsyncQuery QueryAsync(string path, string query)
 		{
 			ValidatePath(path);
+			ValidateArg(query, "query");
 
 			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, HttpUtility.UrlEncode(_basePath + path), HttpUtility.UrlEncode(query)), "POST");
 
@@ -1119,6 +1291,9 @@ namespace Precog.Client
 		///	  var result = client.QueryResultsRaw(handle);
 		/// </example>
 		/// <returns>The raw JSON result object from the query.</returns>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the query is null.
+		/// </exception>
 		public string QueryResultsRaw(AsyncQuery query)
 		{
 			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("/{0}?apiKey={1}", query.JobId, _apiKey));
@@ -1145,6 +1320,12 @@ namespace Precog.Client
 		///	  var result = client.QueryResults&lt;int&gt;(handle);
 		/// </example>
 		/// <returns>A <see cref="QueryResults" /> representing the result of the query computation.</returns>
+		/// <param name='query'>
+		/// The query to return results for
+		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the query is null.
+		/// </exception>
 		public QueryResult<T> QueryResults<T>(AsyncQuery query) where T : new()
 		{
 			return DeserializeQueryResult<T>(QueryResultsRaw(query));
@@ -1165,16 +1346,24 @@ namespace Precog.Client
 		///	  var handle = client.QueryAsync("/", "count(//foo)");
 		///	  var result = client.DownloadQueryResults(handle, "test.json");
 		/// </example>
+		/// <returns></returns>
+		/// <param name='query'>
+		/// The query to return results for
+		/// </param>
+		/// <param name='filename'>
+		/// The name of the file in which to store the results.
+		/// </param>
+		/// <exception cref='ArgumentNullException'>
+		/// Is thrown if the query is null.
+		/// </exception>
+		/// <exception cref='System.IO.IOException'>
+		/// Is thrown if an error occurs during writing to the file
+		/// </exception>
 		public void DownloadQueryResults(AsyncQuery query, string filename)
 		{
-			var uriString = String.Format ("{0}analytics/v1/queries/{1}?apiKey={2}", _endpoint.ToString(), query.JobId, _apiKey);
+			var request = CreateRequest(String.Format ("{0}analytics/v1/queries/{1}?apiKey={2}&format=simple", _endpoint.ToString(), query.JobId, _apiKey));
 
-			// RestSharp doesn't do raw bodies (?!?!?!)
-			HttpWebRequest http = (HttpWebRequest) HttpWebRequest.Create(uriString);
-
-			http.Method = "GET";
-
-			using (HttpWebResponse response = (HttpWebResponse) http.GetResponse())
+			using (HttpWebResponse response = (HttpWebResponse) request.GetResponse())
 			{
 				if (response.StatusCode != HttpStatusCode.OK)
 				{
@@ -1190,7 +1379,9 @@ namespace Precog.Client
 
 		private string QueryInternal(string path, string query, QueryOptions options)
 		{
-			var finalPath = ValidatePath(path);
+			ValidateArg(query, "query");
+			ValidateArg(options, "options");
+			ValidatePath(path);
 
 			var queryParams = String.Format("?format=detailed&apiKey={0}&q={1}", _apiKey, HttpUtility.UrlEncode(query));
 
@@ -1216,12 +1407,12 @@ namespace Precog.Client
 				queryParams += String.Format("&sortOn={0}&sortOrder={1}", "[" + String.Join(",", options.SortOn) + "]", sortOrder);
 			}
 
-			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS + _basePath + finalPath + queryParams);
+			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS + _basePath + path + queryParams);
 
 			return ValidatedResponse(request, "querying");
 		}
 
-		private string ValidatePath(string path)
+		private void ValidatePath(string path)
 		{
 			if (path == null)
 			{
@@ -1232,9 +1423,19 @@ namespace Precog.Client
 			{
 				throw new ArgumentException("Invalid path. Paths must start with \"/\": \"{0}\"", path);
 			}
+		}
 
-			// Horrid workaround for overzealous RestSharp RESTification of GET URIs
-			return path;
+		private static void ValidateArg(object arg, string name)
+		{
+			if (arg == null)
+			{
+				throw new ArgumentNullException("{0} must not be null", name);
+			}
+
+			if (arg is string && ((string) arg) == "")
+			{
+				throw new ArgumentException("{0} must not be empty", name);
+			}
 		}
 
 		private static class Params
