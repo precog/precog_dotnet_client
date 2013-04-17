@@ -58,16 +58,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
   </ItemGroup>
-  <!-- doc generation (monodoc and doxygen) -->
-  <PropertyGroup>
-    <MonodocDirectory>monodoc</MonodocDirectory>
-    <MonoHTMLDirectory>docs\monodoc</MonoHTMLDirectory>
-  </PropertyGroup>
+  <!-- doc generation (doxygen) -->
   <Target Name="Doc" DependsOnTargets="Build">
-    <MakeDir Directories="$(MonodocDirectory)" />
-    <MakeDir Directories="$(MonoHTMLDirectory)" />
     <Exec Command="doxygen Doxyfile" />
-    <Exec Command="mdoc update --delete -i $(DocumentationFile) -o $(MonodocDirectory) $(OutputPath)\PrecogClient.dll" />
-    <Exec Command="mdoc export-html -o $(MonoHTMLDirectory) $(MonodocDirectory)" />
   </Target>
 </Project>
