@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>PrecogClient</id>
-    <version>1.0.0</version>
+    <version>1.0.0.1</version>
     <title>The .Net Client for Precog</title>
     <authors>ReportGrid, Inc.</authors>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
@@ -15,7 +15,7 @@
       http://www.precog.com. This package bundles the API documentation
       under the docs subdirectory.
     </description>
-    <releaseNotes>This is the initial release of this client.</releaseNotes>
+    <releaseNotes>Fixed bad AssemblyInfo compilation</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>precog client</tags>
   </metadata>

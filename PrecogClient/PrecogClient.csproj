@@ -37,6 +37,7 @@
     <Compile Include="Client\AccountInfo.cs" />
     <Compile Include="Client\AppendFormat.cs" />
     <Compile Include="Client\AppendResult.cs" />
+    <Compile Include="Client\AssemblyInfo.cs" />
     <Compile Include="Client\Jobs.cs" />
     <Compile Include="Client\PrecogClient.cs" />
     <Compile Include="Client\QueryOptions.cs" />
