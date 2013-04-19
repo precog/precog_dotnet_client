@@ -62,5 +62,7 @@
   <!-- doc generation (doxygen) -->
   <Target Name="Doc" DependsOnTargets="Build">
     <Exec Command="doxygen Doxyfile" />
+    <!-- NuGet package chokes at install time if this file exists -->
+    <Delete Files="docs/html/installdox" />
   </Target>
 </Project>
