@@ -44,9 +44,6 @@
       <Package>nunit</Package>
     </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="RestSharp">
-      <HintPath>..\lib\RestSharp.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\TestClient.cs" />

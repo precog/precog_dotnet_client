@@ -26,7 +26,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Precog.Client;
-using RestSharp.Serializers;
 
 namespace Precog.Client
 {
@@ -44,6 +43,11 @@ namespace Precog.Client
 			dict["Number"] = Number;
 			dict["Name"] = Name;
 			return dict;
+		}
+
+		public String Serialize()
+		{
+			return "{\"Name\":\"" + Name + "\",\"Number\":" + Number + "}";
 		}
     }
 
@@ -70,8 +74,6 @@ namespace Precog.Client
 		[TestFixtureSetUp]
 		public void Setup()
 		{
-			var serializer = new JsonSerializer();
-
 			email = String.Format("dotnettest{0}@precog.com", (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds);
 
 			password = Guid.NewGuid().ToString();
@@ -89,7 +91,7 @@ namespace Precog.Client
 				originalObjects.Add(d);
 			}
 
-			originalRaw = originalObjects.Select(x => serializer.Serialize(x));
+			originalRaw = originalObjects.Select(x => x.Serialize());
 
 			// We don't want the BOM (Can remove once PLATFORM-629 is resolved)
 			var encodingWithoutBOM = new UTF8Encoding(false);
@@ -210,8 +212,7 @@ namespace Precog.Client
 		{
 			var result = client.Query<JsonObject>("/", String.Format("{{ \"count\" : count(load(\"{0}\")), \"sum\" : sum(load(\"{1}\").Number) }}", SIMPLE_PATH, SIMPLE_PATH));
 
-			var serializer = new JsonSerializer();
-            Console.WriteLine("Sync = " + serializer.Serialize(result));
+            Console.WriteLine("Sync = " + result.DataRaw);
 
 		 	var expectedSum = originalObjects.Sum(x => x.Number) * 5;
 			Assert.AreEqual(expectedSum, (int) (long) result.Data[0]["sum"]);
@@ -228,8 +229,7 @@ namespace Precog.Client
 
             var result = client.QueryResults<JsonObject>(handle);
 
-			var serializer = new JsonSerializer();
-            Console.WriteLine("Async = " + serializer.Serialize(result));
+            Console.WriteLine("Async = " + result.DataRaw);
 
 		 	var expectedSum = originalObjects.Sum(x => x.Number) * 5;
 			Assert.AreEqual(expectedSum, (int) (long) result.Data[0]["sum"]);
