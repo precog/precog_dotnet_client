@@ -24,9 +24,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Mime;
 using System.Text;
+#if NET40
 using System.Web;
+#endif
 
 namespace Precog.Client
 {
@@ -1270,7 +1271,7 @@ namespace Precog.Client
 			ValidatePath(path);
 			ValidateArg(query, "query");
 
-			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, HttpUtility.UrlEncode(_basePath + path), HttpUtility.UrlEncode(query)), "POST");
+			var request = CreateRequest(_endpoint.ToString() + Services.ANALYTICS_ASYNC + String.Format("?apiKey={0}&prefixPath={1}&q={2}", _apiKey, UrlEncode(_basePath + path), UrlEncode(query)), "POST");
 
 			var result =  SimpleJson.DeserializeObject<JsonObject>(ValidatedResponse(request, "querying", HttpStatusCode.Accepted));
 
@@ -1386,7 +1387,7 @@ namespace Precog.Client
 			ValidateArg(options, "options");
 			ValidatePath(path);
 
-			var queryParams = String.Format("?format=detailed&apiKey={0}&q={1}", _apiKey, HttpUtility.UrlEncode(query));
+			var queryParams = String.Format("?format=detailed&apiKey={0}&q={1}", _apiKey, UrlEncode(query));
 
 			if (options.Limit > 0)
 			{
@@ -1439,6 +1440,15 @@ namespace Precog.Client
 			{
 				throw new ArgumentException("{0} must not be empty", name);
 			}
+		}
+
+		private static string UrlEncode(string arg)
+		{
+			#if NET40
+			return HttpUtility.UrlEncode(arg);
+			#elif NET45
+			return WebUtility.UrlEncode(arg);
+			#endif
 		}
 
 		private static class Params

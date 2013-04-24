@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>PrecogClient</id>
-    <version>1.0.0.3</version>
+    <version>1.0.1</version>
     <title>The .Net Client for Precog</title>
     <authors>ReportGrid Inc.</authors>
     <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
@@ -15,15 +15,17 @@
       http://www.precog.com. This package bundles the API documentation
       under the docs subdirectory.
     </description>
-    <releaseNotes>Add targeting for .Net 4.5</releaseNotes>
+    <releaseNotes>Add targeting for WinRT/.Net 4.5</releaseNotes>
     <copyright>Copyright 2013</copyright>
     <tags>precog client</tags>
   </metadata>
   <files>
-    <file src="bin/Debug/PrecogClient.dll" target="lib/net40" />
-    <file src="bin/Debug/PrecogClient.dll.mdb" target="lib/net40" />
-    <file src="bin/Debug/PrecogClient.dll" target="lib/net45" />
-    <file src="bin/Debug/PrecogClient.dll.mdb" target="lib/net45" />
+    <file src="bin/NET40/Debug/PrecogClient.dll" target="lib/net40" />
+    <file src="bin/NET40/Debug/PrecogClient.dll.mdb" target="lib/net40" />
+    <file src="bin/NET45/Debug/PrecogClient.dll" target="lib/net45" />
+    <file src="bin/NET45/Debug/PrecogClient.dll.mdb" target="lib/net45" />
+    <file src="bin/NET45/Debug/PrecogClient.dll" target="lib/winrt45" />
+    <file src="bin/NET45/Debug/PrecogClient.dll.mdb" target="lib/winrt45" />
     <file src="docs/html/**/*" target="docs" />
   </files>
 </package>
